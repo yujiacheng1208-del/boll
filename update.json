@@ -1,6 +1,6 @@
 {
-  "versionCode": 612,
-  "versionName": "6.12",
-  "notes": "主页头像旁新增手动更新扫描按钮",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=612"
+  "versionCode": 613,
+  "versionName": "6.13",
+  "notes": "轨道方块改为整块颜色填充，减轻视觉疲劳",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=613"
 }

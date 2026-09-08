@@ -951,8 +951,10 @@ public final class RollingGameView extends View {
                 path.lineTo(xBottom+halfBottom, yBottom); path.lineTo(xBottom-halfBottom, yBottom); path.close();
                 long tileId = jumpCount - i;
                 int edge = tileColor(tileId, lane);
-                p.setColor(dim(edge, .22f)); c.drawPath(path, p);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(edge);
+                // Use the tile colour across the whole surface; the outline is only
+                // a soft separator rather than the sole source of colour.
+                p.setColor(mix(0xFF07131A, edge, .62f)); c.drawPath(path, p);
+                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.0f*density); p.setColor(mix(edge, Color.WHITE, .12f));
                 c.drawPath(path, p); p.setStyle(Paint.Style.FILL);
             }
         }
