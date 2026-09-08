@@ -1003,12 +1003,15 @@ public final class RollingGameView extends View {
         }
 
         // A gentle, repeating jump keeps the ball above the same lower-middle landing point.
-        lanePosition += (targetLane - lanePosition) * .22f;
+        lanePosition += (targetLane - lanePosition) * .42f;
         float ballX = cx + lanePosition * laneOffsetAtLanding;
         // The two gaps between the three lanes are protected by invisible air walls.
         // Only travelling beyond either outside lane can send the ball into the void.
         int currentLane = Math.round(Math.max(-1f, Math.min(1f, lanePosition)));
         int landingColour = tileColor(jumpCount, currentLane);
+        int intendedLane = Math.round(Math.max(-1f, Math.min(1f, targetLane)));
+        int intendedColour = tileColor(jumpCount, intendedLane);
+        boolean changingLane = Math.abs(targetLane - lanePosition) > .12f;
         // Only a completed jump counts. The opening colour tile selects the rule;
         // later cyan tiles are safe, while another colour must match the selection.
         if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
@@ -1030,7 +1033,11 @@ public final class RollingGameView extends View {
                     colourChosen = true;
                     requiredColour = landingColour;
                     ballTint = landingColour;
-                } else if (landingColour != requiredColour) {
+                } else if (landingColour != requiredColour
+                        // While the ball is still crossing lanes, honour a correct
+                        // intended lane rather than failing on the previous lane's
+                        // colour for one animation frame.
+                        && !(changingLane && (intendedColour == CENTRE_EDGE || intendedColour == requiredColour))) {
                     failed = true;
                     failReason = FAIL_WRONG_COLOUR;
                     frozenElapsed = elapsed;
