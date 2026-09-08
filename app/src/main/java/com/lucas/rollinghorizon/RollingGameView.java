@@ -67,6 +67,7 @@ public final class RollingGameView extends View {
     private int landingEffectColor = CENTRE_EDGE;
     private long colourBonusAt = 0L;
     private int colourBonusColor = CENTRE_EDGE;
+    private long mapSeed = 1L;
     private int score = 0;
     private boolean settingsOpen = false;
     private float sensitivity = 1f;
@@ -557,6 +558,9 @@ public final class RollingGameView extends View {
     private void beginGame(int mode) {
         gameMode = mode;
         gameStartedAt = SystemClock.elapsedRealtime();
+        // A fresh seed makes every new run's colour rows and cyan segments unique,
+        // while preserving a stable layout throughout that one run.
+        mapSeed = System.nanoTime() ^ (gameStartedAt * 1103515245L);
         frozenElapsed = 0L;
         gameElapsed = 0L;
         lastFrameAt = gameStartedAt;
@@ -860,10 +864,18 @@ public final class RollingGameView extends View {
     private static final int ROW_OPTIONAL_SWITCH = 2;
 
     /** A group is one colour row plus two cyan rows; extended groups use four cyan rows. */
-    private static long groupStartFor(long tileId) {
+    private long mapHash(long value) {
+        long hash = value ^ mapSeed;
+        hash ^= hash >>> 33;
+        hash *= 0xff51afd7ed558ccdL;
+        hash ^= hash >>> 33;
+        return hash;
+    }
+
+    private long groupStartFor(long tileId) {
         long start = 4L, group = 0L;
         while (tileId >= start) {
-            long hash = group * 1103515245L + 12345L;
+            long hash = mapHash(group);
             boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
             long next = start + (extended ? 5L : 3L);
             if (tileId < next) return start;
@@ -872,35 +884,41 @@ public final class RollingGameView extends View {
         return -1L;
     }
 
-    private static int rowKind(long tileId) {
+    private int rowKind(long tileId) {
         if (tileId < 4L) return ROW_CYAN;
         long start = groupStartFor(tileId);
         if (tileId == start) return ROW_COLOUR;
         long group = 0L, probe = 4L;
         while (probe < start) {
-            long hash = group * 1103515245L + 12345L;
+            long hash = mapHash(group);
             probe += Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L ? 5L : 3L;
             group++;
         }
-        long hash = group * 1103515245L + 12345L;
+        long hash = mapHash(group);
         boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
         // In a four-cyan group, the second cyan row has the optional middle tile;
         // two cyan rows remain before the next fixed colour row.
         return extended && tileId == start + 2L ? ROW_OPTIONAL_SWITCH : ROW_CYAN;
     }
 
-    private static int optionalColour(long tileId) {
+    private int optionalColour(long tileId) {
         int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
-        long hash = tileId * 1103515245L + 67891L;
-        return colours[(int)Math.floorMod(hash >>> 9, 3L)];
+        long hash = mapHash(tileId * 1103515245L + 67891L);
+        int start = (int)Math.floorMod(hash >>> 9, 3L);
+        // A switch tile must visibly offer a new colour, never the ball's current one.
+        for (int offset = 0; offset < colours.length; offset++) {
+            int candidate = colours[(start + offset) % colours.length];
+            if (candidate != requiredColour) return candidate;
+        }
+        return colours[start];
     }
 
-    private static int tileColor(long tileId, int lane) {
+    private int tileColor(long tileId, int lane) {
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
         if (kind == ROW_OPTIONAL_SWITCH) return lane == 0 ? optionalColour(tileId) : CENTRE_EDGE;
         long colourRowIndex = groupStartFor(tileId) - 4L;
-        long hash = colourRowIndex * 1103515245L + 67891L;
+        long hash = mapHash(colourRowIndex * 1103515245L + 67891L);
         hash ^= hash >>> 16;
         int laneOrder = lane + 1;
         if ((hash & 1L) != 0L) laneOrder = 2 - laneOrder;
