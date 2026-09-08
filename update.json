@@ -1,6 +1,6 @@
 {
-  "versionCode": 627,
-  "versionName": "6.27",
-  "notes": "每局地图随机生成；变色方块不会再与当前球色相同",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@329ddb8c7a963ae530a56c249bf7db5741867df6/releases/tianji-rolling-ball.apk"
+  "versionCode": 628,
+  "versionName": "6.28",
+  "notes": "新增渐变教学关卡；所有模式黄色起步并自然进入首排彩色方块",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@adc1c2241fef0952ba9bfb92b029f5285fdc1396/releases/tianji-rolling-ball.apk"
 }
