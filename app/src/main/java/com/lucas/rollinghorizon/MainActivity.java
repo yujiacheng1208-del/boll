@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.view.Window;
 import android.view.View;
@@ -29,6 +31,8 @@ public class MainActivity extends Activity {
     private long updateDownloadId = -1L;
     private BroadcastReceiver updateReceiver;
     private String pendingUpdateUrl = "";
+    private final Handler updateHandler = new Handler(Looper.getMainLooper());
+    private boolean installerOpened = false;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -106,7 +110,41 @@ public class MainActivity extends Activity {
         request.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "tianji-rolling-ball-update.apk");
         DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
         updateDownloadId = manager.enqueue(request);
+        installerOpened = false;
         Toast.makeText(this, "正在下载更新", Toast.LENGTH_SHORT).show();
+        watchUpdateDownload();
+    }
+
+    private void watchUpdateDownload() {
+        updateHandler.postDelayed(() -> {
+            if (updateDownloadId < 0L || installerOpened) return;
+            DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+            android.database.Cursor cursor = manager.query(new DownloadManager.Query().setFilterById(updateDownloadId));
+            if (cursor.moveToFirst()) {
+                int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+                cursor.close();
+                if (status == DownloadManager.STATUS_SUCCESSFUL) { openDownloadedInstaller(); return; }
+                if (status == DownloadManager.STATUS_FAILED) {
+                    Toast.makeText(this, "更新下载失败，请稍后重试", Toast.LENGTH_LONG).show(); return;
+                }
+            } else cursor.close();
+            watchUpdateDownload();
+        }, 700L);
+    }
+
+    private void openDownloadedInstaller() {
+        if (installerOpened) return;
+        installerOpened = true;
+        Uri apk = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).getUriForDownloadedFile(updateDownloadId);
+        if (apk != null) {
+            try {
+                Intent install = new Intent(Intent.ACTION_VIEW).setDataAndType(apk, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(install);
+            } catch (RuntimeException error) {
+                Toast.makeText(this, "无法打开安装程序", Toast.LENGTH_LONG).show();
+            }
+        } else Toast.makeText(this, "更新文件无法打开", Toast.LENGTH_LONG).show();
     }
 
     private void ensureUpdateReceiver() {
@@ -114,16 +152,7 @@ public class MainActivity extends Activity {
         updateReceiver = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L) != updateDownloadId) return;
-                Uri apk = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).getUriForDownloadedFile(updateDownloadId);
-                if (apk != null) {
-                    try {
-                        Intent install = new Intent(Intent.ACTION_VIEW).setDataAndType(apk, "application/vnd.android.package-archive")
-                                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(install);
-                    } catch (RuntimeException error) {
-                        Toast.makeText(MainActivity.this, "无法打开安装程序", Toast.LENGTH_LONG).show();
-                    }
-                } else Toast.makeText(MainActivity.this, "更新下载失败，请稍后重试", Toast.LENGTH_LONG).show();
+                openDownloadedInstaller();
             }
         };
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
@@ -140,6 +169,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         if (updateReceiver != null) unregisterReceiver(updateReceiver);
+        updateHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 }
