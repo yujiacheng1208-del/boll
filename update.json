@@ -1,6 +1,6 @@
 {
-  "versionCode": 624,
-  "versionName": "6.24",
-  "notes": "修复换轨过程中的颜色误判，并提升横向操控跟手速度",
-  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/0f88f9e52ea8d24b981dfab5768951cb0802d2a7/releases/tianji-rolling-ball.apk"
+  "versionCode": 625,
+  "versionName": "6.25",
+  "notes": "无尽积分榜新增玩家头像显示",
+  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/3388a4c5543387b8427c16198915658d30d9a4a0/releases/tianji-rolling-ball.apk"
 }
