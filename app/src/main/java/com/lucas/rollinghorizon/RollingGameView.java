@@ -939,7 +939,9 @@ public final class RollingGameView extends View {
         float endRate = activeDifficulty == EASY ? 3.1f : activeDifficulty == HARD ? 4.7f : 4.0f;
         // The jump cycle also drives tile travel, so ball rhythm and the oncoming route
         // accelerate together without changing landing alignment.
-        float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp);
+        // Roll the complete route at 1.5× the original travel rate while keeping
+        // tile movement and landing checks locked to the same cycle.
+        float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp) * 1.5f;
         long jumpCount = (long)Math.floor(cycleCount);
         float jumpPhase = cycleCount - jumpCount;
         int progress = Math.min(100, (int)(progressRatio * 100f));
