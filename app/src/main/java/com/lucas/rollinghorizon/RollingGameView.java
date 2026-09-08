@@ -937,14 +937,15 @@ public final class RollingGameView extends View {
         // A gentle, repeating jump keeps the ball above the same lower-middle landing point.
         lanePosition += (targetLane - lanePosition) * .22f;
         float ballX = cx + lanePosition * laneOffsetAtLanding;
-        int currentLane = Math.round(lanePosition);
+        // The two gaps between the three lanes are protected by invisible air walls.
+        // Only travelling beyond either outside lane can send the ball into the void.
+        int currentLane = Math.round(Math.max(-1f, Math.min(1f, lanePosition)));
         int landingColour = tileColor(jumpCount, currentLane, activeDifficulty);
         // Only a completed jump counts. The opening colour tile selects the rule;
         // later cyan tiles are safe, while another colour must match the selection.
         if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
             lastLanding = jumpCount;
-            boolean isAboveTile = currentLane >= -1 && currentLane <= 1
-                    && Math.abs(lanePosition - currentLane) < .28f;
+            boolean isAboveTile = lanePosition > -1.5f && lanePosition < 1.5f;
             if (!isAboveTile) {
                 falling = true;
                 fallStartedAt = now;
