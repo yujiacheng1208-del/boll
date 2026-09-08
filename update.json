@@ -1,6 +1,6 @@
 {
-  "versionCode": 608,
-  "versionName": "6.8",
-  "notes": "下载完成后自动跳转系统安装界面",
-  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/releases/tianji-rolling-ball.apk"
+  "versionCode": 609,
+  "versionName": "6.9",
+  "notes": "更新下载源已切换至高速 CDN",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=609"
 }
