@@ -91,6 +91,7 @@ public final class RollingGameView extends View {
     private int tutorialStage = 0;
     private boolean tutorialHintOpen = false;
     private int tutorialTargetColour = ORANGE_EDGE;
+    private boolean tutorialCompleteOpen = false;
 
     public RollingGameView(Context context) {
         super(context);
@@ -143,7 +144,7 @@ public final class RollingGameView extends View {
                     updateSettingsSlider(event.getX(), event.getY());
                     return true;
                 }
-                if (gameStartedAt >= 0L && !failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && countdownEndsAt == 0L) {
+                if (gameStartedAt >= 0L && !failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && !tutorialCompleteOpen && countdownEndsAt == 0L) {
                     float movement = (event.getX() - touchDownX) / (getWidth() * .30f / sensitivity);
                     // No invisible side walls: dragging beyond the outer lanes is allowed.
                     targetLane = Math.max(-2f, Math.min(2f, dragStartLane + movement));
@@ -173,6 +174,13 @@ public final class RollingGameView extends View {
                         tutorialHintOpen = false;
                         tutorialStage = 2;
                         lastFrameAt = SystemClock.elapsedRealtime();
+                    }
+                    return true;
+                }
+                if (tutorialCompleteOpen) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.64f, true)) {
+                        returnToHome();
+                        difficultyChoiceOpen = true;
                     }
                     return true;
                 }
@@ -615,6 +623,7 @@ public final class RollingGameView extends View {
         tutorialStage = mode == MODE_TUTORIAL ? 0 : 2;
         tutorialHintOpen = false;
         tutorialTargetColour = ORANGE_EDGE;
+        tutorialCompleteOpen = false;
         // Music begins as soon as a game session opens, including the colour-choice screen.
         startMusic();
     }
@@ -632,6 +641,7 @@ public final class RollingGameView extends View {
         colourChoiceOpen = false;
         difficultyChoiceOpen = false;
         confirmHomeOpen = false;
+        tutorialCompleteOpen = false;
         colourBonusAt = 0L;
         score = 0;
         lanePosition = 0f;
@@ -858,6 +868,33 @@ public final class RollingGameView extends View {
         p.setTextAlign(Paint.Align.LEFT);
     }
 
+    private void drawTutorialComplete(Canvas c, float w, float h, long elapsed) {
+        float cx = w*.5f;
+        p.setColor(0x92000000); c.drawRect(0, 0, w, h, p);
+        int[] confetti = {RED_EDGE, ORANGE_EDGE, PINK_EDGE, CENTRE_EDGE, 0xFFB98CFF};
+        for (int i = 0; i < 28; i++) {
+            float x = w * (.08f + ((i * 37) % 83) / 100f);
+            float y = h * (.10f + ((i * 23 + (elapsed / 28)) % 68) / 100f);
+            p.setColor(confetti[i % confetti.length]);
+            c.rotate((i * 37 + elapsed / 9) % 180, x, y);
+            c.drawRect(x-3f*density, y-7f*density, x+3f*density, y+7f*density, p);
+            c.rotate(-((i * 37 + elapsed / 9) % 180), x, y);
+        }
+        p.setShader(new LinearGradient(w*.10f, h*.27f, w*.90f, h*.71f,
+                new int[]{0xF01A3850, 0xF00A1722, 0xF0381740}, null, Shader.TileMode.CLAMP));
+        c.drawRoundRect(w*.10f, h*.27f, w*.90f, h*.71f, 30f*density, 30f*density, p); p.setShader(null);
+        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(0xFF89EEF5);
+        c.drawRoundRect(w*.10f, h*.27f, w*.90f, h*.71f, 30f*density, 30f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(28f*density); p.setColor(Color.WHITE);
+        c.drawText("教学通关", cx, h*.40f, p);
+        p.setTextSize(16f*density); p.setColor(0xFFFFD76A);
+        c.drawText("所有玩法已掌握！", cx, h*.46f, p);
+        p.setTextSize(13f*density); p.setColor(0xFFC3E2E8);
+        c.drawText("快去关卡模式闯关吧", cx, h*.51f, p);
+        drawButton(c, cx, h*.64f, "前往关卡模式");
+        p.setTextAlign(Paint.Align.LEFT);
+    }
+
     private void drawResultOverlay(Canvas c, float w, float h, boolean won, int reason) {
         float cx = w*.5f, top = h*.20f, bottom = h*.78f;
         int accent = won ? 0xFF77E8A2 : reason == FAIL_VOID ? 0xFFAA8CFF : 0xFFFF7886;
@@ -1059,7 +1096,7 @@ public final class RollingGameView extends View {
                 lastFrameAt = now;
                 startMusic();
             }
-            if (!failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && countdownEndsAt == 0L) gameElapsed += now - lastFrameAt;
+            if (!failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && !tutorialCompleteOpen && countdownEndsAt == 0L) gameElapsed += now - lastFrameAt;
             lastFrameAt = now;
             elapsed = (failed || completed) ? frozenElapsed : gameElapsed;
         }
@@ -1083,6 +1120,11 @@ public final class RollingGameView extends View {
         if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && tutorialSwitchVisible) {
             tutorialStage = 1;
             tutorialHintOpen = true;
+            lastFrameAt = now;
+        }
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 2
+                && jumpCount >= TUTORIAL_SWITCH_TILE + 8L) {
+            tutorialCompleteOpen = true;
             lastFrameAt = now;
         }
         int progress = Math.min(100, (int)(progressRatio * 100f));
@@ -1327,6 +1369,7 @@ public final class RollingGameView extends View {
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
         if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed) drawTutorialGuide(c, w, h, elapsed);
         if (tutorialHintOpen && gameStartedAt >= 0L) drawTutorialSwitchPrompt(c, w, h);
+        if (tutorialCompleteOpen && gameStartedAt >= 0L) drawTutorialComplete(c, w, h, elapsed);
         if (countdownEndsAt != 0L && gameStartedAt >= 0L) {
             int count = (int)Math.ceil((countdownEndsAt - now) / 1000.0);
             p.setColor(0x99000000); c.drawRect(0, 0, w, h, p);
