@@ -962,14 +962,14 @@ public final class RollingGameView extends View {
             }
         }
 
-        // Individual floating tiles replace the continuous track. Their world-space
-        // spacing matches one jump, so the ball lands at a tile's centre.
+        // Individual floating tiles replace the continuous track and stream under
+        // the grounded ball, making the motion read as rolling rather than hopping.
         float groundBallY = h*.72f;
         float landingZ = (float)Math.sqrt((groundBallY - horizon) / (trackEnd - horizon));
-        float radius = w * .098f;
-        // Each landing tile is 0.7 ball diameters long and 0.7 ball diameters wide.
-        float tileHalfWidthAtLanding = radius * .7f;
-        float laneOffsetAtLanding = tileHalfWidthAtLanding * 3.25f;
+        float radius = w * .075f;
+        // Broader lanes with only a slim visual seam between them reduce the void gap.
+        float tileHalfWidthAtLanding = radius * 1.25f;
+        float laneOffsetAtLanding = tileHalfWidthAtLanding * 2.15f;
         float depthSlopeAtLanding = 2f * (trackEnd - horizon) * landingZ;
         float tileHalfDepth = radius * .7f / depthSlopeAtLanding;
         float tileSpacing = tileHalfDepth * 2f * 1.08f;
@@ -1050,11 +1050,10 @@ public final class RollingGameView extends View {
                 landingEffectColor = ballTint;
             }
         }
-        // Keep the same cycle length, but ease both take-off and landing so the
-        // vertical movement is smooth instead of snapping into a sine arc.
-        float jumpSine = (float)Math.sin(jumpPhase * Math.PI);
-        float jumpAmount = jumpSine * jumpSine * h * .028f;
-        float ballY = groundBallY - jumpAmount;
+        // The route moves beneath a grounded rolling ball; its vertical position is
+        // fixed so there is no remaining hop animation.
+        float jumpAmount = 0f;
+        float ballY = groundBallY;
         if (falling) {
             float fall = Math.min(1f, (now - fallStartedAt) / 500f);
             ballY = groundBallY + fall * fall * h * .48f;
@@ -1110,7 +1109,7 @@ public final class RollingGameView extends View {
         c.drawPath(path, p); p.setShader(null);
 
         // The shadow remains on the track, contracting and fading while the ball is airborne.
-        float heightRatio = falling ? 1f : jumpAmount / (h * .028f);
+        float heightRatio = falling ? 1f : 0f;
         float shadowY = groundBallY + radius*.78f;
         float shadowHalfWidth = radius * (1.18f - .55f * heightRatio);
         float shadowHalfHeight = radius * (.22f - .10f * heightRatio);

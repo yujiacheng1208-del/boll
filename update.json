@@ -1,6 +1,6 @@
 {
-  "versionCode": 619,
-  "versionName": "6.19",
-  "notes": "移除头像旁更新入口；修复设置返回主页确认弹窗无法取消或确定的问题",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=619"
+  "versionCode": 620,
+  "versionName": "6.20",
+  "notes": "加宽轨道、缩小轨道间隙和球体；取消跳跃，改为贴地滚动",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=620"
 }
