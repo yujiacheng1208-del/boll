@@ -90,6 +90,7 @@ public final class RollingGameView extends View {
     private boolean confirmHomeOpen = false;
     private int tutorialStage = 0;
     private boolean tutorialHintOpen = false;
+    private int tutorialTargetColour = ORANGE_EDGE;
 
     public RollingGameView(Context context) {
         super(context);
@@ -168,7 +169,7 @@ public final class RollingGameView extends View {
                     return true;
                 }
                 if (tutorialHintOpen) {
-                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.63f, true)) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.40f, true)) {
                         tutorialHintOpen = false;
                         tutorialStage = 2;
                         lastFrameAt = SystemClock.elapsedRealtime();
@@ -254,9 +255,16 @@ public final class RollingGameView extends View {
                         else if (Math.abs(x-w*.50f) <= 34f*density) chosen = ORANGE_EDGE;
                         else if (Math.abs(x-w*.72f) <= 34f*density) chosen = PINK_EDGE;
                         else return true;
-                        requiredColour = chosen;
-                        ballTint = chosen;
-                        colourChosen = true;
+                        if (gameMode == MODE_TUTORIAL) {
+                            tutorialTargetColour = chosen;
+                            requiredColour = CENTRE_EDGE;
+                            ballTint = CENTRE_EDGE;
+                            colourChosen = false;
+                        } else {
+                            requiredColour = chosen;
+                            ballTint = chosen;
+                            colourChosen = true;
+                        }
                         colourChoiceOpen = false;
                         lastFrameAt = SystemClock.elapsedRealtime();
                         startMusic();
@@ -599,13 +607,14 @@ public final class RollingGameView extends View {
         colourBonusAt = 0L;
         score = 0;
         settingsOpen = false;
-        // Every mode begins as a yellow ball. The first colour row arrives naturally
-        // after roughly two seconds rather than opening a selection dialog.
-        colourChoiceOpen = false;
+        // Normal modes begin as yellow and reach their first colour row naturally.
+        // The tutorial first asks for the colour it will later teach.
+        colourChoiceOpen = mode == MODE_TUTORIAL;
         difficultyChoiceOpen = false;
         confirmHomeOpen = false;
         tutorialStage = mode == MODE_TUTORIAL ? 0 : 2;
         tutorialHintOpen = false;
+        tutorialTargetColour = ORANGE_EDGE;
         // Music begins as soon as a game session opens, including the colour-choice screen.
         startMusic();
     }
@@ -742,9 +751,9 @@ public final class RollingGameView extends View {
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.3f*density); p.setColor(0xFF79EAF7);
         c.drawRoundRect(w*.09f, top, w*.91f, bottom, 24f*density, 24f*density, p); p.setStyle(Paint.Style.FILL);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(22f*density); p.setColor(Color.WHITE);
-        c.drawText("选择你的颜色", cx, h*.34f, p);
+        c.drawText(gameMode == MODE_TUTORIAL ? "选择你喜欢的颜色" : "选择你的颜色", cx, h*.34f, p);
         p.setTextSize(13f*density); p.setColor(0xFFB5D3DB);
-        c.drawText("后续只能踩同色踏块，青色安全", cx, h*.39f, p);
+        c.drawText(gameMode == MODE_TUTORIAL ? "选好后继续教学路线" : "后续只能踩同色踏块，黄色安全", cx, h*.39f, p);
         int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
         String[] names = {"红", "青", "粉"};
         for (int i = 0; i < 3; i++) {
@@ -755,7 +764,7 @@ public final class RollingGameView extends View {
             p.setTextSize(18f*density); p.setColor(Color.WHITE); c.drawText(names[i], x, y+6f*density, p);
         }
         p.setTextSize(11f*density); p.setColor(0xFF7298A4);
-        c.drawText("选择后，约 2 秒抵达第一排彩色踏块", cx, h*.64f, p);
+        c.drawText(gameMode == MODE_TUTORIAL ? "后续会在变色方块中变为所选颜色" : "选择后，约 2 秒抵达第一排彩色踏块", cx, h*.64f, p);
         drawSecondaryButton(c, cx, h*.71f, "返回主页");
     }
 
@@ -819,7 +828,7 @@ public final class RollingGameView extends View {
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(density); p.setColor(0x99FFE28A);
         c.drawRoundRect(w*.12f, h*.09f, w*.88f, h*.19f, 18f*density, 18f*density, p); p.setStyle(Paint.Style.FILL);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(14f*density); p.setColor(0xFFFFD76A);
-        String headline = tutorialStage < 2 ? "黄色球 · 安全路线" : "青色球 · 寻找青色方块";
+        String headline = tutorialStage < 2 ? "黄色球 · 安全路线" : colourName(tutorialTargetColour) + "球 · 寻找" + colourName(tutorialTargetColour) + "方块";
         c.drawText(headline, cx, h*.128f, p);
         p.setTextSize(11f*density); p.setColor(0xFFD8E8D0);
         c.drawText(tutorialStage < 2 ? "变色后，只能走相同颜色的方块" : "其他颜色方块会导致失败", cx, h*.163f, p);
@@ -828,20 +837,24 @@ public final class RollingGameView extends View {
 
     private void drawTutorialSwitchPrompt(Canvas c, float w, float h) {
         float cx = w*.5f;
-        p.setColor(0x82000000); c.drawRect(0, 0, w, h, p);
-        p.setShader(new LinearGradient(w*.11f, h*.34f, w*.89f, h*.68f,
+        // Leave most of the route visible: this is a guide pinned above it rather
+        // than a blocking dialogue.
+        p.setColor(0x26000000); c.drawRect(0, 0, w, h, p);
+        p.setShader(new LinearGradient(w*.11f, h*.18f, w*.89f, h*.47f,
                 new int[]{0xF0183441, 0xF00A1620, 0xE820123C}, null, Shader.TileMode.CLAMP));
-        c.drawRoundRect(w*.11f, h*.34f, w*.89f, h*.68f, 26f*density, 26f*density, p);
+        c.drawRoundRect(w*.11f, h*.18f, w*.89f, h*.47f, 26f*density, 26f*density, p);
         p.setShader(null);
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(0xFF6DEAF5);
-        c.drawRoundRect(w*.11f, h*.34f, w*.89f, h*.68f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
-        p.setColor(ORANGE_EDGE); c.drawCircle(cx, h*.425f, 19f*density, p);
+        c.drawRoundRect(w*.11f, h*.18f, w*.89f, h*.47f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setColor(tutorialTargetColour); c.drawCircle(cx, h*.255f, 19f*density, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(21f*density); p.setColor(Color.WHITE);
-        c.drawText("路线攻略", cx, h*.49f, p);
+        c.drawText("变色格教学", cx, h*.32f, p);
         p.setTextSize(13f*density); p.setColor(0xFFC6E4E9);
-        c.drawText("前方青色方块即将到达，保持中间轨道", cx, h*.535f, p);
-        c.drawText("走过后小球变青色，只能走青色方块", cx, h*.565f, p);
-        drawButton(c, cx, h*.63f, "继续前进");
+        c.drawText("保持在中间轨道 → 穿过前方" + colourName(tutorialTargetColour) + "方块", cx, h*.365f, p);
+        c.drawText("小球会变" + colourName(tutorialTargetColour) + "，之后只能走同色方块", cx, h*.392f, p);
+        // A small direction marker keeps the player's focus on the visible route.
+        p.setColor(tutorialTargetColour); path.reset(); path.moveTo(cx, h*.50f); path.lineTo(cx-10f*density, h*.475f); path.lineTo(cx+10f*density, h*.475f); path.close(); c.drawPath(path, p);
+        drawButton(c, cx, h*.40f, "继续前进");
         p.setTextAlign(Paint.Align.LEFT);
     }
 
@@ -988,8 +1001,13 @@ public final class RollingGameView extends View {
         if (gameMode == MODE_TUTORIAL) {
             // A safe yellow stretch, one cyan switch, then a cyan centre target.
             if (tileId < TUTORIAL_SWITCH_TILE || tileId == TUTORIAL_SWITCH_TILE + 1L || tileId == TUTORIAL_SWITCH_TILE + 2L) return CENTRE_EDGE;
-            if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? ORANGE_EDGE : CENTRE_EDGE;
-            if (tileId == TUTORIAL_SWITCH_TILE + 3L) return lane < 0 ? RED_EDGE : lane > 0 ? PINK_EDGE : ORANGE_EDGE;
+            if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? tutorialTargetColour : CENTRE_EDGE;
+            if (tileId == TUTORIAL_SWITCH_TILE + 3L) {
+                if (lane == 0) return tutorialTargetColour;
+                if (tutorialTargetColour == RED_EDGE) return lane < 0 ? ORANGE_EDGE : PINK_EDGE;
+                if (tutorialTargetColour == ORANGE_EDGE) return lane < 0 ? RED_EDGE : PINK_EDGE;
+                return lane < 0 ? RED_EDGE : ORANGE_EDGE;
+            }
         }
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
@@ -1007,6 +1025,13 @@ public final class RollingGameView extends View {
 
     private boolean isSwitchTile(long tileId) {
         return (gameMode == MODE_TUTORIAL && tileId == TUTORIAL_SWITCH_TILE) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
+    }
+
+    private String colourName(int colour) {
+        if (colour == RED_EDGE) return "红色";
+        if (colour == ORANGE_EDGE) return "青色";
+        if (colour == PINK_EDGE) return "粉色";
+        return "黄色";
     }
     @Override protected void onDraw(Canvas c) {
         super.onDraw(c);
@@ -1053,7 +1078,9 @@ public final class RollingGameView extends View {
         float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp) * 1.5f;
         long jumpCount = (long)Math.floor(cycleCount);
         float jumpPhase = cycleCount - jumpCount;
-        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && jumpCount >= TUTORIAL_GUIDE_TILE) {
+        boolean tutorialSwitchVisible = jumpCount > TUTORIAL_GUIDE_TILE
+                || (jumpCount == TUTORIAL_GUIDE_TILE && jumpPhase >= .62f);
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && tutorialSwitchVisible) {
             tutorialStage = 1;
             tutorialHintOpen = true;
             lastFrameAt = now;
