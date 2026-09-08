@@ -138,28 +138,33 @@ public final class RollingGameView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 // The small profile chip is available both on the home screen and in play.
-                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() > 145f*density && event.getX() < 215f*density && event.getY() < 72f*density) {
+                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() >= 151f*density && event.getX() <= 204f*density && event.getY() >= 18f*density && event.getY() <= 50f*density) {
                     if (getContext() instanceof MainActivity) ((MainActivity)getContext()).scanForUpdate();
                     return true;
                 }
-                if (!currentUser.isEmpty() && event.getX() < 215f*density && event.getY() < 72f*density) {
+                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() >= 10f*density && event.getX() <= 214f*density && event.getY() >= 10f*density && event.getY() <= 58f*density) {
                     if (gameStartedAt < 0L) showProfileDialog();
                     return true;
                 }
                 // The home-screen gear opens the exact same controls as the
                 // in-game gear; it must be handled before the mode buttons.
-                if (gameStartedAt < 0L && event.getX() > getWidth() - 72f*density && event.getY() < 72f*density) {
+                if (gameStartedAt < 0L && isGearTap(event.getX(), event.getY())) {
                     settingsOpen = true;
                     return true;
                 }
                 if (settingsOpen) {
-                    if (event.getY() > getHeight()*.60f && event.getY() < getHeight()*.69f) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.33f, getHeight()*.65f, false)) {
                         if (gameStartedAt < 0L) {
                             settingsOpen = false;
-                        } else if (event.getX() < getWidth()*.5f) {
-                            confirmHomeOpen = true;
                         } else {
+                            confirmHomeOpen = true;
+                        }
+                        return true;
+                    }
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.67f, getHeight()*.65f, false)) {
+                        if (gameStartedAt < 0L) {
                             settingsOpen = false;
+                        } else {
                             countdownEndsAt = SystemClock.elapsedRealtime() + 3000L;
                         }
                         return true;
@@ -169,59 +174,66 @@ public final class RollingGameView extends View {
                 }
                 if (gameStartedAt < 0L) {
                     if (leaderboardOpen) {
-                        leaderboardOpen = false;
+                        if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.72f, false)) leaderboardOpen = false;
                     } else if (difficultyChoiceOpen) {
-                        float y = event.getY();
-                        if (y > getHeight()*.70f) {
+                        float x = event.getX(), y = event.getY();
+                        if (isButtonTap(x, y, getWidth()*.5f, getHeight()*.74f, false)) {
                             difficultyChoiceOpen = false;
-                        } else if (y >= getHeight()*.37f && y < getHeight()*.49f) {
+                        } else if (x >= getWidth()*.20f && x <= getWidth()*.80f && y >= getHeight()*.43f-29f*density && y <= getHeight()*.43f+29f*density) {
                             levelDifficulty = EASY;
                             startMode(MODE_LEVEL);
-                        } else if (y >= getHeight()*.49f && y < getHeight()*.60f) {
+                        } else if (x >= getWidth()*.20f && x <= getWidth()*.80f && y >= getHeight()*.54f-29f*density && y <= getHeight()*.54f+29f*density) {
                             levelDifficulty = MEDIUM;
                             startMode(MODE_LEVEL);
-                        } else if (y >= getHeight()*.60f && y <= getHeight()*.70f) {
+                        } else if (x >= getWidth()*.20f && x <= getWidth()*.80f && y >= getHeight()*.65f-29f*density && y <= getHeight()*.65f+29f*density) {
                             levelDifficulty = HARD;
                             startMode(MODE_LEVEL);
                         }
-                    } else if (event.getX() < 190f*density && event.getY() > 70f*density && event.getY() < 116f*density) {
+                    } else if (isButtonTap(event.getX(), event.getY(), 91f*density, 93f*density, false)) {
                         leaderboardOpen = true;
-                    } else if (event.getY() > getHeight()*.43f && event.getY() < getHeight()*.54f) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.485f, true)) {
                         difficultyChoiceOpen = true;
-                    } else if (event.getY() >= getHeight()*.54f && event.getY() < getHeight()*.63f) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.58f, false)) {
                         startMode(MODE_ENDLESS);
-                    } else if (currentUser.isEmpty() && event.getY() >= getHeight()*.63f && event.getY() < getHeight()*.71f) {
+                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.30f, getHeight()*.67f, false)) {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
-                        if (event.getX() < getWidth()*.5f) showRegisterDialog(MODE_NONE);
-                        else showLoginDialog(MODE_NONE);
-                    } else if (event.getY() >= getHeight()*.71f && event.getY() < getHeight()*.79f && getContext() instanceof MainActivity) {
+                        showRegisterDialog(MODE_NONE);
+                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.70f, getHeight()*.67f, false)) {
+                        currentUser = "";
+                        preferences.edit().remove(ACTIVE_USER).apply();
+                        showLoginDialog(MODE_NONE);
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.75f, false) && getContext() instanceof MainActivity) {
                         ((MainActivity)getContext()).scanForUpdate();
-                    } else if (event.getY() > getHeight()*.85f && event.getY() < getHeight()*.92f && getContext() instanceof Activity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.89f, false) && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
                     return true;
                 }
                 if (failed || completed) {
-                    if (event.getY() > getHeight() * .665f) returnToHome(); else beginGame();
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.63f, true)) beginGame();
+                    else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.71f, false)) returnToHome();
                     return true;
                 }
                 if (confirmHomeOpen) {
-                    if (event.getY() > getHeight()*.51f && event.getY() < getHeight()*.62f) {
-                        if (event.getX() < getWidth()*.5f) confirmHomeOpen = false; else returnToHome();
-                    }
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.32f, getHeight()*.56f, false)) confirmHomeOpen = false;
+                    else if (isButtonTap(event.getX(), event.getY(), getWidth()*.68f, getHeight()*.56f, true)) returnToHome();
                     return true;
                 }
                 if (colourChoiceOpen) {
-                    if (event.getY() > getHeight()*.665f) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.71f, false)) {
                         returnToHome();
                         return true;
                     }
                     float choiceY = getHeight()*.55f;
-                    if (Math.abs(event.getY() - choiceY) < 48f*density) {
+                    if (Math.abs(event.getY() - choiceY) <= 34f*density) {
                         float x = event.getX(), w = getWidth();
-                        int chosen = x < w*.4f ? RED_EDGE : x > w*.6f ? PINK_EDGE : ORANGE_EDGE;
+                        int chosen;
+                        if (Math.abs(x-w*.28f) <= 34f*density) chosen = RED_EDGE;
+                        else if (Math.abs(x-w*.50f) <= 34f*density) chosen = ORANGE_EDGE;
+                        else if (Math.abs(x-w*.72f) <= 34f*density) chosen = PINK_EDGE;
+                        else return true;
                         requiredColour = chosen;
                         ballTint = chosen;
                         colourChosen = true;
@@ -231,7 +243,7 @@ public final class RollingGameView extends View {
                     }
                     return true;
                 }
-                if (event.getX() > getWidth() - 72f*density && event.getY() < 72f*density) {
+                if (isGearTap(event.getX(), event.getY())) {
                     if (settingsOpen) {
                         settingsOpen = false;
                         countdownEndsAt = SystemClock.elapsedRealtime() + 3000L;
@@ -617,6 +629,19 @@ public final class RollingGameView extends View {
         c.drawText(label, cx, cy + 5f*density, p);
     }
 
+    /** A UI action is valid only inside the visible button that labels it. */
+    private boolean isButtonTap(float x, float y, float cx, float cy, boolean primary) {
+        float halfWidth = 71f * density;
+        float halfHeight = (primary ? 24f : 20f) * density;
+        return x >= cx-halfWidth && x <= cx+halfWidth && y >= cy-halfHeight && y <= cy+halfHeight;
+    }
+
+    private boolean isGearTap(float x, float y) {
+        float gearX = getWidth() - 36f*density, gearY = 36f*density;
+        float dx = x-gearX, dy = y-gearY;
+        return dx*dx + dy*dy <= 26f*density*26f*density;
+    }
+
     private void drawStartOverlay(Canvas c, float w, float h) {
         float cx = w*.5f;
         p.setColor(0xB8000000); c.drawRect(0, 0, w, h, p);
@@ -951,7 +976,7 @@ public final class RollingGameView extends View {
         float laneOffsetAtLanding = tileHalfWidthAtLanding * 3.25f;
         float depthSlopeAtLanding = 2f * (trackEnd - horizon) * landingZ;
         float tileHalfDepth = radius * .7f / depthSlopeAtLanding;
-        float tileSpacing = tileHalfDepth * 2f * 1.32f;
+        float tileSpacing = tileHalfDepth * 2f * 1.08f;
         // Repeating exactly one spacing per jump is seamless: the next tile takes
         // the previous tile's place, so the path never runs out over time.
         float tileTravel = jumpPhase * tileSpacing;
@@ -1032,7 +1057,7 @@ public final class RollingGameView extends View {
         // Keep the same cycle length, but ease both take-off and landing so the
         // vertical movement is smooth instead of snapping into a sine arc.
         float jumpSine = (float)Math.sin(jumpPhase * Math.PI);
-        float jumpAmount = jumpSine * jumpSine * h * .072f;
+        float jumpAmount = jumpSine * jumpSine * h * .028f;
         float ballY = groundBallY - jumpAmount;
         if (falling) {
             float fall = Math.min(1f, (now - fallStartedAt) / 500f);
@@ -1089,7 +1114,7 @@ public final class RollingGameView extends View {
         c.drawPath(path, p); p.setShader(null);
 
         // The shadow remains on the track, contracting and fading while the ball is airborne.
-        float heightRatio = falling ? 1f : jumpAmount / (h * .072f);
+        float heightRatio = falling ? 1f : jumpAmount / (h * .028f);
         float shadowY = groundBallY + radius*.78f;
         float shadowHalfWidth = radius * (1.18f - .55f * heightRatio);
         float shadowHalfHeight = radius * (.22f - .10f * heightRatio);
