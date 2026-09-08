@@ -1,6 +1,6 @@
 {
-  "versionCode": 629,
-  "versionName": "6.29",
-  "notes": "教学关卡移至关卡模式上方；主页五项主要操作改为等距布局",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@d6a0e57abbfdcc1409f6908f63bcf45883e1b0b6/releases/tianji-rolling-ball.apk"
+  "versionCode": 630,
+  "versionName": "6.30",
+  "notes": "关卡模式按钮统一为与主页其他主要选项相同的样式",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@17da2cc6c76230f0aceccf6b88765947bf4ac0e4/releases/tianji-rolling-ball.apk"
 }
