@@ -1,6 +1,6 @@
 {
-  "versionCode": 620,
-  "versionName": "6.20",
-  "notes": "加宽轨道、缩小轨道间隙和球体；取消跳跃，改为贴地滚动",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=620"
+  "versionCode": 621,
+  "versionName": "6.21",
+  "notes": "调整主页按钮布局，检测更新与退出游戏靠近显示",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=621"
 }

@@ -207,9 +207,9 @@ public final class RollingGameView extends View {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         showLoginDialog(MODE_NONE);
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.75f, false) && getContext() instanceof MainActivity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.78f, false) && getContext() instanceof MainActivity) {
                         ((MainActivity)getContext()).scanForUpdate();
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.89f, false) && getContext() instanceof Activity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.85f, false) && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
@@ -664,8 +664,8 @@ public final class RollingGameView extends View {
             drawSecondaryButton(c, w*.30f, h*.67f, "注册");
             drawSecondaryButton(c, w*.70f, h*.67f, "登录");
         }
-        drawSecondaryButton(c, cx, h*.75f, "检测更新");
-        drawSecondaryButton(c, cx, h*.89f, "退出游戏");
+        drawSecondaryButton(c, cx, h*.78f, "检测更新");
+        drawSecondaryButton(c, cx, h*.85f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
 
