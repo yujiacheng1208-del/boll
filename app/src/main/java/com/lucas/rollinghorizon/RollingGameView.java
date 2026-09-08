@@ -84,7 +84,7 @@ public final class RollingGameView extends View {
         preferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         currentUser = preferences.getString(ACTIVE_USER, "");
         try {
-            ambientMusic = MediaPlayer.create(context, R.raw.stay_with_you);
+            ambientMusic = MediaPlayer.create(context, R.raw.background_music);
             if (ambientMusic != null) { ambientMusic.setLooping(true); ambientMusic.setVolume(musicVolume, musicVolume); }
         } catch (RuntimeException ignored) { }
         startMusic();
