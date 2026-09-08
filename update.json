@@ -1,6 +1,6 @@
 {
-  "versionCode": 625,
-  "versionName": "6.25",
-  "notes": "无尽积分榜新增玩家头像显示",
-  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/3388a4c5543387b8427c16198915658d30d9a4a0/releases/tianji-rolling-ball.apk"
+  "versionCode": 626,
+  "versionName": "6.26",
+  "notes": "黄色改为基础轨道色，青色改为特殊色；加快并优化更新检查与下载",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@a5a813b7538530728cb4b029af2f1d5ed847d6ca/releases/tianji-rolling-ball.apk"
 }
