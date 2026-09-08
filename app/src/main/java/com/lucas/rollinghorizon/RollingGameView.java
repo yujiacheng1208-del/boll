@@ -209,11 +209,11 @@ public final class RollingGameView extends View {
                         }
                     } else if (isButtonTap(event.getX(), event.getY(), 91f*density, 93f*density, false)) {
                         leaderboardOpen = true;
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.485f, true)) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.52f, true)) {
                         difficultyChoiceOpen = true;
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.58f, false)) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.595f, false)) {
                         startMode(MODE_ENDLESS);
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.65f, false)) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.445f, false)) {
                         startMode(MODE_TUTORIAL);
                     } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.30f, getHeight()*.72f, false)) {
                         currentUser = "";
@@ -223,9 +223,9 @@ public final class RollingGameView extends View {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         showLoginDialog(MODE_NONE);
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.80f, false) && getContext() instanceof MainActivity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*(currentUser.isEmpty() ? .755f : .67f), false) && getContext() instanceof MainActivity) {
                         ((MainActivity)getContext()).scanForUpdate();
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.87f, false) && getContext() instanceof Activity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*(currentUser.isEmpty() ? .84f : .745f), false) && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
@@ -681,15 +681,16 @@ public final class RollingGameView extends View {
         c.drawText("选择模式，踏上你的颜色之路", cx, h*.375f, p);
         p.setTextSize(12f*density); p.setColor(0xFF6F9BA6);
         c.drawText(currentUser.isEmpty() ? "登录或注册后保存你的战绩" : "当前玩家 · " + currentUser, cx, h*.415f, p);
-        drawButton(c, cx, h*.485f, "关卡模式");
-        drawSecondaryButton(c, cx, h*.58f, "无尽模式");
-        drawSecondaryButton(c, cx, h*.65f, "教学关卡");
+        drawSecondaryButton(c, cx, h*.445f, "教学关卡");
+        drawButton(c, cx, h*.52f, "关卡模式");
+        drawSecondaryButton(c, cx, h*.595f, "无尽模式");
         if (currentUser.isEmpty()) {
             drawSecondaryButton(c, w*.30f, h*.72f, "注册");
             drawSecondaryButton(c, w*.70f, h*.72f, "登录");
         }
-        drawSecondaryButton(c, cx, h*.80f, "检测更新");
-        drawSecondaryButton(c, cx, h*.87f, "退出游戏");
+        float utilityY = currentUser.isEmpty() ? h*.755f : h*.67f;
+        drawSecondaryButton(c, cx, utilityY, "检测更新");
+        drawSecondaryButton(c, cx, utilityY + h*.085f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
 
