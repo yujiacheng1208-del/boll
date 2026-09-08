@@ -1,6 +1,6 @@
 {
-  "versionCode": 630,
-  "versionName": "6.30",
-  "notes": "关卡模式按钮统一为与主页其他主要选项相同的样式",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@17da2cc6c76230f0aceccf6b88765947bf4ac0e4/releases/tianji-rolling-ball.apk"
+  "versionCode": 631,
+  "versionName": "6.31",
+  "notes": "延长教学安全路线，并在变色格到达前暂停显示路线攻略",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@0c8d0c2398f93bd5cd9f76aff53e2d9ce3c1bff5/releases/tianji-rolling-ball.apk"
 }
