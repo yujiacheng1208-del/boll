@@ -797,13 +797,13 @@ public final class RollingGameView extends View {
     private static final int ROW_COLOUR = 1;
     private static final int ROW_OPTIONAL_SWITCH = 2;
 
-    /** A group is one colour row plus two cyan rows; some groups add a third cyan row. */
+    /** A group is one colour row plus two cyan rows; extended groups use four cyan rows. */
     private static long groupStartFor(long tileId) {
         long start = 4L, group = 0L;
         while (tileId >= start) {
             long hash = group * 1103515245L + 12345L;
             boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
-            long next = start + (extended ? 4L : 3L);
+            long next = start + (extended ? 5L : 3L);
             if (tileId < next) return start;
             start = next; group++;
         }
@@ -817,12 +817,13 @@ public final class RollingGameView extends View {
         long group = 0L, probe = 4L;
         while (probe < start) {
             long hash = group * 1103515245L + 12345L;
-            probe += Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L ? 4L : 3L;
+            probe += Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L ? 5L : 3L;
             group++;
         }
         long hash = group * 1103515245L + 12345L;
         boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
-        // In a three-cyan group, the second cyan row has the optional middle tile.
+        // In a four-cyan group, the second cyan row has the optional middle tile;
+        // two cyan rows remain before the next fixed colour row.
         return extended && tileId == start + 2L ? ROW_OPTIONAL_SWITCH : ROW_CYAN;
     }
 
