@@ -1,6 +1,6 @@
 {
-  "versionCode": 626,
-  "versionName": "6.26",
-  "notes": "黄色改为基础轨道色，青色改为特殊色；加快并优化更新检查与下载",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@a5a813b7538530728cb4b029af2f1d5ed847d6ca/releases/tianji-rolling-ball.apk"
+  "versionCode": 627,
+  "versionName": "6.27",
+  "notes": "每局地图随机生成；变色方块不会再与当前球色相同",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@329ddb8c7a963ae530a56c249bf7db5741867df6/releases/tianji-rolling-ball.apk"
 }
