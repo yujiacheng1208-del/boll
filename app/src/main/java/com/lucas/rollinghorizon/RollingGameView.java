@@ -126,6 +126,7 @@ public final class RollingGameView extends View {
                 dragStartLane = targetLane;
                 return true;
             case MotionEvent.ACTION_MOVE:
+                if (confirmHomeOpen) return true;
                 if (settingsOpen) {
                     updateSettingsSlider(event.getX(), event.getY());
                     return true;
@@ -138,11 +139,7 @@ public final class RollingGameView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 // The small profile chip is available both on the home screen and in play.
-                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() >= 151f*density && event.getX() <= 204f*density && event.getY() >= 18f*density && event.getY() <= 50f*density) {
-                    if (getContext() instanceof MainActivity) ((MainActivity)getContext()).scanForUpdate();
-                    return true;
-                }
-                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() >= 10f*density && event.getX() <= 214f*density && event.getY() >= 10f*density && event.getY() <= 58f*density) {
+                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() >= 10f*density && event.getX() <= 145f*density && event.getY() >= 10f*density && event.getY() <= 58f*density) {
                     if (gameStartedAt < 0L) showProfileDialog();
                     return true;
                 }
@@ -150,6 +147,13 @@ public final class RollingGameView extends View {
                 // in-game gear; it must be handled before the mode buttons.
                 if (gameStartedAt < 0L && isGearTap(event.getX(), event.getY())) {
                     settingsOpen = true;
+                    return true;
+                }
+                // This confirmation sits above the settings card, so it must get
+                // first refusal for both visible buttons.
+                if (confirmHomeOpen) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.32f, getHeight()*.56f, false)) confirmHomeOpen = false;
+                    else if (isButtonTap(event.getX(), event.getY(), getWidth()*.68f, getHeight()*.56f, true)) returnToHome();
                     return true;
                 }
                 if (settingsOpen) {
@@ -214,11 +218,6 @@ public final class RollingGameView extends View {
                 if (failed || completed) {
                     if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.63f, true)) beginGame();
                     else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.71f, false)) returnToHome();
-                    return true;
-                }
-                if (confirmHomeOpen) {
-                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.32f, getHeight()*.56f, false)) confirmHomeOpen = false;
-                    else if (isButtonTap(event.getX(), event.getY(), getWidth()*.68f, getHeight()*.56f, true)) returnToHome();
                     return true;
                 }
                 if (colourChoiceOpen) {
@@ -725,15 +724,12 @@ public final class RollingGameView extends View {
         int[] colours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
         int avatar = preferences.getInt("avatar_" + currentUser, 0) % colours.length;
         float x = 34f*density, y = 34f*density, r = 18f*density;
-        p.setColor(0xB80A1821); c.drawRoundRect(10f*density, 10f*density, 214f*density, 58f*density, 24f*density, 24f*density, p);
+        p.setColor(0xB80A1821); c.drawRoundRect(10f*density, 10f*density, 145f*density, 58f*density, 24f*density, 24f*density, p);
         p.setColor(colours[avatar]); c.drawCircle(x, y, r, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(17f*density); p.setColor(Color.WHITE);
         c.drawText(currentUser.substring(0, 1), x, y + 6f*density, p);
         p.setTextAlign(Paint.Align.LEFT); p.setTextSize(13f*density); p.setColor(Color.WHITE);
         c.drawText(currentUser, 61f*density, y + 5f*density, p);
-        p.setColor(0xFF1A6070); c.drawRoundRect(151f*density, 18f*density, 204f*density, 50f*density, 14f*density, 14f*density, p);
-        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(11f*density); p.setColor(0xFFE5FCFF);
-        c.drawText("更新", 177.5f*density, y + 4f*density, p);
     }
 
     private void drawHomeConfirm(Canvas c, float w, float h) {

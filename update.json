@@ -1,6 +1,6 @@
 {
-  "versionCode": 618,
-  "versionName": "6.18",
-  "notes": "所有按钮改为框内点击才响应；降低跳跃高度并缩小踏块排间距",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=618"
+  "versionCode": 619,
+  "versionName": "6.19",
+  "notes": "移除头像旁更新入口；修复设置返回主页确认弹窗无法取消或确定的问题",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=619"
 }
