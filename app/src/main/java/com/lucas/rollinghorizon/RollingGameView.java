@@ -114,6 +114,11 @@ public final class RollingGameView extends View {
     public void pauseBackgroundMusic() { pauseMusic(); }
     public void resumeBackgroundMusic() { startMusic(); }
 
+    @Override protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility != VISIBLE) pauseMusic();
+    }
+
     @Override public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -181,18 +186,20 @@ public final class RollingGameView extends View {
                         }
                     } else if (event.getX() < 190f*density && event.getY() > 70f*density && event.getY() < 116f*density) {
                         leaderboardOpen = true;
-                    } else if (event.getY() > getHeight()*.45f && event.getY() < getHeight()*.55f) {
+                    } else if (event.getY() > getHeight()*.43f && event.getY() < getHeight()*.54f) {
                         difficultyChoiceOpen = true;
-                    } else if (event.getY() >= getHeight()*.55f && event.getY() < getHeight()*.64f) {
+                    } else if (event.getY() >= getHeight()*.54f && event.getY() < getHeight()*.63f) {
                         startMode(MODE_ENDLESS);
-                    } else if (currentUser.isEmpty() && event.getY() >= getHeight()*.64f && event.getY() < getHeight()*.73f) {
+                    } else if (currentUser.isEmpty() && event.getY() >= getHeight()*.63f && event.getY() < getHeight()*.71f) {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         if (event.getX() < getWidth()*.5f) showRegisterDialog(MODE_NONE);
                         else showLoginDialog(MODE_NONE);
-                    } else if (event.getY() >= getHeight()*.73f && event.getY() < getHeight()*.81f) {
+                    } else if (event.getY() >= getHeight()*.71f && event.getY() < getHeight()*.79f && getContext() instanceof MainActivity) {
+                        ((MainActivity)getContext()).scanForUpdate();
+                    } else if (event.getY() >= getHeight()*.79f && event.getY() < getHeight()*.85f) {
                         settingsOpen = true;
-                    } else if (event.getY() > getHeight()*.81f && event.getY() < getHeight()*.90f && getContext() instanceof Activity) {
+                    } else if (event.getY() > getHeight()*.85f && event.getY() < getHeight()*.92f && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
@@ -629,14 +636,15 @@ public final class RollingGameView extends View {
         c.drawText("选择模式，踏上你的颜色之路", cx, h*.375f, p);
         p.setTextSize(12f*density); p.setColor(0xFF6F9BA6);
         c.drawText(currentUser.isEmpty() ? "登录或注册后保存你的战绩" : "当前玩家 · " + currentUser, cx, h*.415f, p);
-        drawButton(c, cx, h*.50f, "关卡模式");
-        drawSecondaryButton(c, cx, h*.59f, "无尽模式");
+        drawButton(c, cx, h*.485f, "关卡模式");
+        drawSecondaryButton(c, cx, h*.58f, "无尽模式");
         if (currentUser.isEmpty()) {
-            drawSecondaryButton(c, w*.30f, h*.68f, "注册");
-            drawSecondaryButton(c, w*.70f, h*.68f, "登录");
+            drawSecondaryButton(c, w*.30f, h*.67f, "注册");
+            drawSecondaryButton(c, w*.70f, h*.67f, "登录");
         }
-        drawSecondaryButton(c, cx, h*.77f, "设置");
-        drawSecondaryButton(c, cx, h*.85f, "退出游戏");
+        drawSecondaryButton(c, cx, h*.75f, "检测更新");
+        drawSecondaryButton(c, cx, h*.82f, "设置");
+        drawSecondaryButton(c, cx, h*.89f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
 

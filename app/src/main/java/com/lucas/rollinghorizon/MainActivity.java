@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
     private long updateDownloadId = -1L;
     private BroadcastReceiver updateReceiver;
     private String pendingUpdateUrl = "";
+    private int pendingUpdateVersion = 0;
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private boolean installerOpened = false;
     private RollingGameView gameView;
@@ -65,8 +66,10 @@ public class MainActivity extends Activity {
     private void checkForUpdate(boolean manual) {
         new Thread(() -> {
             try {
-                HttpURLConnection connection = (HttpURLConnection)new URL(UPDATE_INFO_URL).openConnection();
+                HttpURLConnection connection = (HttpURLConnection)new URL(UPDATE_INFO_URL + "?t=" + System.currentTimeMillis()).openConnection();
                 connection.setConnectTimeout(5000); connection.setReadTimeout(5000);
+                connection.setUseCaches(false);
+                connection.setRequestProperty("Cache-Control", "no-cache");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder body = new StringBuilder(); String line;
                 while ((line = reader.readLine()) != null) body.append(line);
@@ -86,7 +89,7 @@ public class MainActivity extends Activity {
     private void showUpdate(JSONObject info, String apkUrl) {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("发现新版本 " + info.optString("versionName", ""))
                 .setMessage(info.optString("notes", "优化游戏体验"))
-                .setNegativeButton("稍后", null).setPositiveButton("立即更新", (d, w) -> downloadUpdate(apkUrl)).create();
+                .setNegativeButton("稍后", null).setPositiveButton("立即更新", (d, w) -> downloadUpdate(apkUrl, info.optInt("versionCode", 0))).create();
         dialog.setOnShowListener(ignored -> styleUpdateDialog(dialog));
         dialog.show();
     }
@@ -97,9 +100,10 @@ public class MainActivity extends Activity {
         if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFF071C22);
     }
 
-    private void downloadUpdate(String apkUrl) {
+    private void downloadUpdate(String apkUrl, int versionCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !getPackageManager().canRequestPackageInstalls()) {
             pendingUpdateUrl = apkUrl;
+            pendingUpdateVersion = versionCode;
             AlertDialog dialog = new AlertDialog.Builder(this).setTitle("允许安装更新")
                     .setMessage("请允许天机滚珠安装下载的新版本，然后会自动继续更新。")
                     .setNegativeButton("取消", null).setPositiveButton("前往授权", (d, w) -> {
@@ -113,9 +117,13 @@ public class MainActivity extends Activity {
         }
         ensureUpdateReceiver();
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(apkUrl));
+        request.addRequestHeader("Cache-Control", "no-cache");
         request.setTitle("天机滚珠更新"); request.setDescription("正在下载新版本");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "tianji-rolling-ball-update.apk");
+        // Every version gets a distinct destination so Android never reuses a
+        // previous APK with the same file name.
+        request.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS,
+                "tianji-rolling-ball-update-" + Math.max(1, versionCode) + ".apk");
         DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
         updateDownloadId = manager.enqueue(request);
         installerOpened = false;
@@ -172,13 +180,21 @@ public class MainActivity extends Activity {
         super.onResume();
         if (gameView != null) gameView.resumeBackgroundMusic();
         if (!pendingUpdateUrl.isEmpty() && (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || getPackageManager().canRequestPackageInstalls())) {
-            String url = pendingUpdateUrl; pendingUpdateUrl = ""; downloadUpdate(url);
+            String url = pendingUpdateUrl; int version = pendingUpdateVersion;
+            pendingUpdateUrl = ""; pendingUpdateVersion = 0; downloadUpdate(url, version);
         }
     }
 
     @Override protected void onPause() {
         if (gameView != null) gameView.pauseBackgroundMusic();
         super.onPause();
+    }
+
+    @Override protected void onStop() {
+        // Some devices leave audio alive past onPause while switching apps.
+        // Stop it again at the definitive background transition.
+        if (gameView != null) gameView.pauseBackgroundMusic();
+        super.onStop();
     }
 
     @Override protected void onDestroy() {
