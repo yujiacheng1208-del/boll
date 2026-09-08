@@ -87,6 +87,7 @@ public final class RollingGameView extends View {
             ambientMusic = MediaPlayer.create(context, R.raw.stay_with_you);
             if (ambientMusic != null) { ambientMusic.setLooping(true); ambientMusic.setVolume(musicVolume, musicVolume); }
         } catch (RuntimeException ignored) { }
+        startMusic();
     }
 
     private void startMusic() {
@@ -198,7 +199,6 @@ public final class RollingGameView extends View {
                         countdownEndsAt = SystemClock.elapsedRealtime() + 3000L;
                     } else if (countdownEndsAt == 0L) {
                         settingsOpen = true;
-                        pauseMusic();
                     }
                     return true;
                 }
@@ -546,7 +546,6 @@ public final class RollingGameView extends View {
 
     private void returnToHome() {
         gameStartedAt = -1L;
-        stopMusic();
         gameMode = MODE_NONE;
         gameElapsed = 0L;
         frozenElapsed = 0L;
@@ -884,7 +883,6 @@ public final class RollingGameView extends View {
             completed = true;
             frozenElapsed = elapsed;
             savePlayerProgress(100);
-            stopMusic();
         }
 
         // Pure black space keeps the focus on the line of travel.
@@ -960,7 +958,6 @@ public final class RollingGameView extends View {
                     failed = true;
                     failReason = FAIL_WRONG_COLOUR;
                     frozenElapsed = elapsed;
-                    stopMusic();
                 } else {
                     ballTint = landingColour;
                 }
@@ -1075,7 +1072,6 @@ public final class RollingGameView extends View {
             failed = true;
             failReason = FAIL_VOID;
             frozenElapsed = elapsed;
-            stopMusic();
         }
         if (settingsOpen && !failed && !completed && gameStartedAt >= 0L) drawSettings(c, w, h);
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);

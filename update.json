@@ -1,6 +1,6 @@
 {
-  "versionCode": 600,
-  "versionName": "6.0",
-  "notes": "初始在线更新版本",
+  "versionCode": 601,
+  "versionName": "6.1",
+  "notes": "背景音乐现已在所有游戏界面持续播放",
   "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/releases/tianji-rolling-ball.apk"
 }
