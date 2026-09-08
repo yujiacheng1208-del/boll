@@ -197,8 +197,6 @@ public final class RollingGameView extends View {
                         else showLoginDialog(MODE_NONE);
                     } else if (event.getY() >= getHeight()*.71f && event.getY() < getHeight()*.79f && getContext() instanceof MainActivity) {
                         ((MainActivity)getContext()).scanForUpdate();
-                    } else if (event.getY() >= getHeight()*.79f && event.getY() < getHeight()*.85f) {
-                        settingsOpen = true;
                     } else if (event.getY() > getHeight()*.85f && event.getY() < getHeight()*.92f && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
@@ -643,7 +641,6 @@ public final class RollingGameView extends View {
             drawSecondaryButton(c, w*.70f, h*.67f, "登录");
         }
         drawSecondaryButton(c, cx, h*.75f, "检测更新");
-        drawSecondaryButton(c, cx, h*.82f, "设置");
         drawSecondaryButton(c, cx, h*.89f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
@@ -993,6 +990,7 @@ public final class RollingGameView extends View {
         // later cyan tiles are safe, while another colour must match the selection.
         if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
             lastLanding = jumpCount;
+            boolean changedBallColour = false;
             boolean isAboveTile = lanePosition > -1.5f && lanePosition < 1.5f;
             if (!isAboveTile) {
                 falling = true;
@@ -1003,6 +1001,7 @@ public final class RollingGameView extends View {
                 // it changes the active colour, while passing it keeps the old one.
                 requiredColour = landingColour;
                 ballTint = landingColour;
+                changedBallColour = true;
             } else if (landingColour != CENTRE_EDGE) {
                 if (!colourChosen) {
                     colourChosen = true;
@@ -1018,9 +1017,8 @@ public final class RollingGameView extends View {
             }
             if (!failed && !falling) {
                 score++;
-                // A coloured landing earns a clear bonus. Cyan remains the neutral
-                // safe route and does not produce a score pop-up.
-                if (landingColour != CENTRE_EDGE) {
+                // Only the switch tile that really changes the ball earns a bonus.
+                if (changedBallColour) {
                     score += 10;
                     colourBonusAt = now;
                     colourBonusColor = landingColour;

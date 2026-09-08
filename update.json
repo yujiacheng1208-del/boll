@@ -1,6 +1,6 @@
 {
-  "versionCode": 616,
-  "versionName": "6.16",
-  "notes": "后台停止音乐；新增主页检测更新；更新下载按版本隔离，避免安装旧文件",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=616"
+  "versionCode": 617,
+  "versionName": "6.17",
+  "notes": "主页仅保留右上角设置；变色加分仅作用于实际切换球颜色的特殊方块",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=617"
 }
