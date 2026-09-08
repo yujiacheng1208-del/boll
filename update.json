@@ -1,6 +1,6 @@
 {
-  "versionCode": 623,
-  "versionName": "6.23",
-  "notes": "修复软件内更新下载到旧版 6.9 的缓存问题",
-  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/e4ced18/releases/tianji-rolling-ball.apk"
+  "versionCode": 624,
+  "versionName": "6.24",
+  "notes": "修复换轨过程中的颜色误判，并提升横向操控跟手速度",
+  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/0f88f9e52ea8d24b981dfab5768951cb0802d2a7/releases/tianji-rolling-ball.apk"
 }
