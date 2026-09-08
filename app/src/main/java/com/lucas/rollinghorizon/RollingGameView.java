@@ -34,9 +34,10 @@ public final class RollingGameView extends View {
     private static final String PREFS = "tianji_players";
     private static final String ACCOUNTS = "accounts";
     private static final String ACTIVE_USER = "active_user";
-    private static final int CENTRE_EDGE = 0xFF55D9E7;
+    // Yellow is the neutral, safe route. Cyan is now one of the special colours.
+    private static final int CENTRE_EDGE = 0xFFFFC65B;
     private static final int RED_EDGE = 0xFFFF5F70;
-    private static final int ORANGE_EDGE = 0xFFFFA34D;
+    private static final int ORANGE_EDGE = 0xFF55D9E7;
     private static final int PINK_EDGE = 0xFFFF77C9;
     private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path = new Path();
@@ -715,7 +716,7 @@ public final class RollingGameView extends View {
         p.setTextSize(13f*density); p.setColor(0xFFB5D3DB);
         c.drawText("后续只能踩同色踏块，青色安全", cx, h*.39f, p);
         int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
-        String[] names = {"红", "橙", "粉"};
+        String[] names = {"红", "青", "粉"};
         for (int i = 0; i < 3; i++) {
             float x = w * (.28f + i*.22f), y = h*.55f;
             p.setColor(dim(colours[i], .28f)); c.drawCircle(x, y, 34f*density, p);

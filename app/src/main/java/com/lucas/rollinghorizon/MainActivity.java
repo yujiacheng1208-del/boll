@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Base64;
 import android.view.Window;
 import android.view.View;
 import android.widget.TextView;
@@ -27,7 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MainActivity extends Activity {
-    private static final String UPDATE_INFO_URL = "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/update.json";
+    private static final String UPDATE_INFO_URL = "https://api.github.com/repos/yujiacheng1208-del/boll/contents/update.json?ref=main";
     private long updateDownloadId = -1L;
     private BroadcastReceiver updateReceiver;
     private String pendingUpdateUrl = "";
@@ -66,7 +67,8 @@ public class MainActivity extends Activity {
     private void checkForUpdate(boolean manual) {
         new Thread(() -> {
             try {
-                HttpURLConnection connection = (HttpURLConnection)new URL(UPDATE_INFO_URL + "?t=" + System.currentTimeMillis()).openConnection();
+                String separator = UPDATE_INFO_URL.contains("?") ? "&" : "?";
+                HttpURLConnection connection = (HttpURLConnection)new URL(UPDATE_INFO_URL + separator + "t=" + System.currentTimeMillis()).openConnection();
                 connection.setConnectTimeout(5000); connection.setReadTimeout(5000);
                 connection.setUseCaches(false);
                 connection.setRequestProperty("Cache-Control", "no-cache");
@@ -75,10 +77,17 @@ public class MainActivity extends Activity {
                 while ((line = reader.readLine()) != null) body.append(line);
                 reader.close(); connection.disconnect();
                 JSONObject info = new JSONObject(body.toString());
-                int versionCode = info.optInt("versionCode", 0);
-                String apkUrl = info.optString("apkUrl", "");
+                // GitHub's contents API returns a base64 file body. It is less prone
+                // to serving an old branch copy than the Raw endpoint.
+                if (info.has("content")) {
+                    String encoded = info.optString("content", "").replace("\n", "");
+                    info = new JSONObject(new String(Base64.decode(encoded, Base64.DEFAULT), "UTF-8"));
+                }
+                final JSONObject updateInfo = info;
+                int versionCode = updateInfo.optInt("versionCode", 0);
+                String apkUrl = updateInfo.optString("apkUrl", "");
                 if (versionCode > BuildConfig.VERSION_CODE && !apkUrl.isEmpty()) {
-                    runOnUiThread(() -> showUpdate(info, apkUrl));
+                    runOnUiThread(() -> showUpdate(updateInfo, apkUrl));
                 } else if (manual) {
                     runOnUiThread(() -> Toast.makeText(this, "当前已是最新版本", Toast.LENGTH_SHORT).show());
                 }
