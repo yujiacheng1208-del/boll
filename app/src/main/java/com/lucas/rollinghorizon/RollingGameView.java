@@ -28,6 +28,8 @@ public final class RollingGameView extends View {
     private static final int MODE_NONE = 0;
     private static final int MODE_LEVEL = 1;
     private static final int MODE_ENDLESS = 2;
+    private static final int MODE_TUTORIAL = 3;
+    private static final long FIRST_COLOUR_TILE = 6L;
     private static final int EASY = 0;
     private static final int MEDIUM = 1;
     private static final int HARD = 2;
@@ -81,6 +83,8 @@ public final class RollingGameView extends View {
     private int pendingMode = MODE_NONE;
     private boolean leaderboardOpen = false;
     private boolean confirmHomeOpen = false;
+    private int tutorialStage = 0;
+    private boolean tutorialHintOpen = false;
 
     public RollingGameView(Context context) {
         super(context);
@@ -133,7 +137,7 @@ public final class RollingGameView extends View {
                     updateSettingsSlider(event.getX(), event.getY());
                     return true;
                 }
-                if (gameStartedAt >= 0L && !failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && countdownEndsAt == 0L) {
+                if (gameStartedAt >= 0L && !failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && countdownEndsAt == 0L) {
                     float movement = (event.getX() - touchDownX) / (getWidth() * .30f / sensitivity);
                     // No invisible side walls: dragging beyond the outer lanes is allowed.
                     targetLane = Math.max(-2f, Math.min(2f, dragStartLane + movement));
@@ -156,6 +160,14 @@ public final class RollingGameView extends View {
                 if (confirmHomeOpen) {
                     if (isButtonTap(event.getX(), event.getY(), getWidth()*.32f, getHeight()*.56f, false)) confirmHomeOpen = false;
                     else if (isButtonTap(event.getX(), event.getY(), getWidth()*.68f, getHeight()*.56f, true)) returnToHome();
+                    return true;
+                }
+                if (tutorialHintOpen) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.63f, true)) {
+                        tutorialHintOpen = false;
+                        tutorialStage = 2;
+                        lastFrameAt = SystemClock.elapsedRealtime();
+                    }
                     return true;
                 }
                 if (settingsOpen) {
@@ -201,17 +213,19 @@ public final class RollingGameView extends View {
                         difficultyChoiceOpen = true;
                     } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.58f, false)) {
                         startMode(MODE_ENDLESS);
-                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.30f, getHeight()*.67f, false)) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.65f, false)) {
+                        startMode(MODE_TUTORIAL);
+                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.30f, getHeight()*.72f, false)) {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         showRegisterDialog(MODE_NONE);
-                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.70f, getHeight()*.67f, false)) {
+                    } else if (currentUser.isEmpty() && isButtonTap(event.getX(), event.getY(), getWidth()*.70f, getHeight()*.72f, false)) {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         showLoginDialog(MODE_NONE);
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.78f, false) && getContext() instanceof MainActivity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.80f, false) && getContext() instanceof MainActivity) {
                         ((MainActivity)getContext()).scanForUpdate();
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.85f, false) && getContext() instanceof Activity) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.87f, false) && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
@@ -268,7 +282,7 @@ public final class RollingGameView extends View {
     }
 
     private void startMode(int mode) {
-        if (currentUser == null || currentUser.trim().isEmpty()) {
+        if (mode != MODE_TUTORIAL && (currentUser == null || currentUser.trim().isEmpty())) {
             pendingMode = mode;
             showAccountChoiceDialog(mode);
         } else beginGame(mode);
@@ -579,9 +593,13 @@ public final class RollingGameView extends View {
         colourBonusAt = 0L;
         score = 0;
         settingsOpen = false;
-        colourChoiceOpen = true;
+        // Every mode begins as a yellow ball. The first colour row arrives naturally
+        // after roughly two seconds rather than opening a selection dialog.
+        colourChoiceOpen = false;
         difficultyChoiceOpen = false;
         confirmHomeOpen = false;
+        tutorialStage = mode == MODE_TUTORIAL ? 0 : 2;
+        tutorialHintOpen = false;
         // Music begins as soon as a game session opens, including the colour-choice screen.
         startMusic();
     }
@@ -665,12 +683,13 @@ public final class RollingGameView extends View {
         c.drawText(currentUser.isEmpty() ? "登录或注册后保存你的战绩" : "当前玩家 · " + currentUser, cx, h*.415f, p);
         drawButton(c, cx, h*.485f, "关卡模式");
         drawSecondaryButton(c, cx, h*.58f, "无尽模式");
+        drawSecondaryButton(c, cx, h*.65f, "教学关卡");
         if (currentUser.isEmpty()) {
-            drawSecondaryButton(c, w*.30f, h*.67f, "注册");
-            drawSecondaryButton(c, w*.70f, h*.67f, "登录");
+            drawSecondaryButton(c, w*.30f, h*.72f, "注册");
+            drawSecondaryButton(c, w*.70f, h*.72f, "登录");
         }
-        drawSecondaryButton(c, cx, h*.78f, "检测更新");
-        drawSecondaryButton(c, cx, h*.85f, "退出游戏");
+        drawSecondaryButton(c, cx, h*.80f, "检测更新");
+        drawSecondaryButton(c, cx, h*.87f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
 
@@ -782,6 +801,43 @@ public final class RollingGameView extends View {
         drawSecondaryButton(c, cx, h*.74f, "返回");
     }
 
+    private void drawTutorialGuide(Canvas c, float w, float h, long elapsed) {
+        float cx = w*.5f;
+        float fade = .62f + .20f * (float)Math.sin(elapsed / 1150f);
+        int leftAlpha = (int)(190f * fade), rightAlpha = (int)(85f * fade);
+        p.setShader(new LinearGradient(w*.12f, h*.09f, w*.88f, h*.19f,
+                new int[]{Color.argb(leftAlpha, 39, 48, 20), Color.argb(rightAlpha, 7, 20, 28)}, null, Shader.TileMode.CLAMP));
+        c.drawRoundRect(w*.12f, h*.09f, w*.88f, h*.19f, 18f*density, 18f*density, p);
+        p.setShader(null);
+        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(density); p.setColor(0x99FFE28A);
+        c.drawRoundRect(w*.12f, h*.09f, w*.88f, h*.19f, 18f*density, 18f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(14f*density); p.setColor(0xFFFFD76A);
+        String headline = tutorialStage < 2 ? "黄色球 · 安全路线" : "青色球 · 寻找青色方块";
+        c.drawText(headline, cx, h*.128f, p);
+        p.setTextSize(11f*density); p.setColor(0xFFD8E8D0);
+        c.drawText(tutorialStage < 2 ? "变色后，只能走相同颜色的方块" : "其他颜色方块会导致失败", cx, h*.163f, p);
+        p.setTextAlign(Paint.Align.LEFT);
+    }
+
+    private void drawTutorialSwitchPrompt(Canvas c, float w, float h) {
+        float cx = w*.5f;
+        p.setColor(0x82000000); c.drawRect(0, 0, w, h, p);
+        p.setShader(new LinearGradient(w*.11f, h*.34f, w*.89f, h*.68f,
+                new int[]{0xF0183441, 0xF00A1620, 0xE820123C}, null, Shader.TileMode.CLAMP));
+        c.drawRoundRect(w*.11f, h*.34f, w*.89f, h*.68f, 26f*density, 26f*density, p);
+        p.setShader(null);
+        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(0xFF6DEAF5);
+        c.drawRoundRect(w*.11f, h*.34f, w*.89f, h*.68f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setColor(ORANGE_EDGE); c.drawCircle(cx, h*.425f, 19f*density, p);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(21f*density); p.setColor(Color.WHITE);
+        c.drawText("颜色变换", cx, h*.49f, p);
+        p.setTextSize(13f*density); p.setColor(0xFFC6E4E9);
+        c.drawText("小球走过青色方块后会变为青色", cx, h*.535f, p);
+        c.drawText("随后只能前进在青色方块上", cx, h*.565f, p);
+        drawButton(c, cx, h*.63f, "继续前进");
+        p.setTextAlign(Paint.Align.LEFT);
+    }
+
     private void drawResultOverlay(Canvas c, float w, float h, boolean won, int reason) {
         float cx = w*.5f, top = h*.20f, bottom = h*.78f;
         int accent = won ? 0xFF77E8A2 : reason == FAIL_VOID ? 0xFFAA8CFF : 0xFFFF7886;
@@ -863,7 +919,7 @@ public final class RollingGameView extends View {
     private static final int ROW_COLOUR = 1;
     private static final int ROW_OPTIONAL_SWITCH = 2;
 
-    /** A group is one colour row plus two cyan rows; extended groups use four cyan rows. */
+    /** A group is one colour row plus two yellow rows; extended groups use four yellow rows. */
     private long mapHash(long value) {
         long hash = value ^ mapSeed;
         hash ^= hash >>> 33;
@@ -873,7 +929,7 @@ public final class RollingGameView extends View {
     }
 
     private long groupStartFor(long tileId) {
-        long start = 4L, group = 0L;
+        long start = FIRST_COLOUR_TILE, group = 0L;
         while (tileId >= start) {
             long hash = mapHash(group);
             boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
@@ -885,10 +941,10 @@ public final class RollingGameView extends View {
     }
 
     private int rowKind(long tileId) {
-        if (tileId < 4L) return ROW_CYAN;
+        if (tileId < FIRST_COLOUR_TILE) return ROW_CYAN;
         long start = groupStartFor(tileId);
         if (tileId == start) return ROW_COLOUR;
-        long group = 0L, probe = 4L;
+        long group = 0L, probe = FIRST_COLOUR_TILE;
         while (probe < start) {
             long hash = mapHash(group);
             probe += Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L ? 5L : 3L;
@@ -914,10 +970,16 @@ public final class RollingGameView extends View {
     }
 
     private int tileColor(long tileId, int lane) {
+        if (gameMode == MODE_TUTORIAL) {
+            // A safe yellow stretch, one cyan switch, then a cyan centre target.
+            if (tileId < 10L || tileId == 11L || tileId == 12L) return CENTRE_EDGE;
+            if (tileId == 10L) return lane == 0 ? ORANGE_EDGE : CENTRE_EDGE;
+            if (tileId == 13L) return lane < 0 ? RED_EDGE : lane > 0 ? PINK_EDGE : ORANGE_EDGE;
+        }
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
         if (kind == ROW_OPTIONAL_SWITCH) return lane == 0 ? optionalColour(tileId) : CENTRE_EDGE;
-        long colourRowIndex = groupStartFor(tileId) - 4L;
+        long colourRowIndex = groupStartFor(tileId) - FIRST_COLOUR_TILE;
         long hash = mapHash(colourRowIndex * 1103515245L + 67891L);
         hash ^= hash >>> 16;
         int laneOrder = lane + 1;
@@ -926,6 +988,10 @@ public final class RollingGameView extends View {
         if (variant == 0) return RED_EDGE;
         if (variant == 1) return ORANGE_EDGE;
         return PINK_EDGE;
+    }
+
+    private boolean isSwitchTile(long tileId) {
+        return (gameMode == MODE_TUTORIAL && tileId == 10L) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
     }
     @Override protected void onDraw(Canvas c) {
         super.onDraw(c);
@@ -953,7 +1019,7 @@ public final class RollingGameView extends View {
                 lastFrameAt = now;
                 startMusic();
             }
-            if (!failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && countdownEndsAt == 0L) gameElapsed += now - lastFrameAt;
+            if (!failed && !completed && !falling && !settingsOpen && !colourChoiceOpen && !confirmHomeOpen && !tutorialHintOpen && countdownEndsAt == 0L) gameElapsed += now - lastFrameAt;
             lastFrameAt = now;
             elapsed = (failed || completed) ? frozenElapsed : gameElapsed;
         }
@@ -972,6 +1038,11 @@ public final class RollingGameView extends View {
         float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp) * 1.5f;
         long jumpCount = (long)Math.floor(cycleCount);
         float jumpPhase = cycleCount - jumpCount;
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && jumpCount >= 10L) {
+            tutorialStage = 1;
+            tutorialHintOpen = true;
+            lastFrameAt = now;
+        }
         int progress = Math.min(100, (int)(progressRatio * 100f));
         if (gameMode == MODE_LEVEL && gameStartedAt >= 0L && !failed && !completed && progress >= 100) {
             completed = true;
@@ -1042,7 +1113,7 @@ public final class RollingGameView extends View {
         boolean changingLane = Math.abs(targetLane - lanePosition) > .12f;
         // Only a completed jump counts. The opening colour tile selects the rule;
         // later cyan tiles are safe, while another colour must match the selection.
-        if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
+        if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && !tutorialHintOpen && jumpCount > 0L && jumpCount != lastLanding) {
             lastLanding = jumpCount;
             boolean changedBallColour = false;
             boolean isAboveTile = lanePosition > -1.5f && lanePosition < 1.5f;
@@ -1050,11 +1121,12 @@ public final class RollingGameView extends View {
                 falling = true;
                 fallStartedAt = now;
                 frozenElapsed = elapsed;
-            } else if (rowKind(jumpCount) == ROW_OPTIONAL_SWITCH && currentLane == 0) {
+            } else if (isSwitchTile(jumpCount) && currentLane == 0) {
                 // The middle tile on an extended cyan group is optional: stepping on
                 // it changes the active colour, while passing it keeps the old one.
                 requiredColour = landingColour;
                 ballTint = landingColour;
+                colourChosen = true;
                 changedBallColour = true;
             } else if (landingColour != CENTRE_EDGE) {
                 if (!colourChosen) {
@@ -1210,6 +1282,8 @@ public final class RollingGameView extends View {
         if (settingsOpen && !failed && !completed) drawSettings(c, w, h);
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
+        if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed) drawTutorialGuide(c, w, h, elapsed);
+        if (tutorialHintOpen && gameStartedAt >= 0L) drawTutorialSwitchPrompt(c, w, h);
         if (countdownEndsAt != 0L && gameStartedAt >= 0L) {
             int count = (int)Math.ceil((countdownEndsAt - now) / 1000.0);
             p.setColor(0x99000000); c.drawRect(0, 0, w, h, p);
