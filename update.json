@@ -1,6 +1,6 @@
 {
-  "versionCode": 622,
-  "versionName": "6.22",
-  "notes": "轨道滚动速度提升至原来的 1.5 倍",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=622"
+  "versionCode": 623,
+  "versionName": "6.23",
+  "notes": "修复软件内更新下载到旧版 6.9 的缓存问题",
+  "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/releases/tianji-rolling-ball.apk?version=623"
 }
