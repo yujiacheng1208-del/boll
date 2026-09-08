@@ -209,7 +209,7 @@ public final class RollingGameView extends View {
                         }
                     } else if (isButtonTap(event.getX(), event.getY(), 91f*density, 93f*density, false)) {
                         leaderboardOpen = true;
-                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.52f, true)) {
+                    } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.52f, false)) {
                         difficultyChoiceOpen = true;
                     } else if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.595f, false)) {
                         startMode(MODE_ENDLESS);
@@ -682,7 +682,7 @@ public final class RollingGameView extends View {
         p.setTextSize(12f*density); p.setColor(0xFF6F9BA6);
         c.drawText(currentUser.isEmpty() ? "登录或注册后保存你的战绩" : "当前玩家 · " + currentUser, cx, h*.415f, p);
         drawSecondaryButton(c, cx, h*.445f, "教学关卡");
-        drawButton(c, cx, h*.52f, "关卡模式");
+        drawSecondaryButton(c, cx, h*.52f, "关卡模式");
         drawSecondaryButton(c, cx, h*.595f, "无尽模式");
         if (currentUser.isEmpty()) {
             drawSecondaryButton(c, w*.30f, h*.72f, "注册");
