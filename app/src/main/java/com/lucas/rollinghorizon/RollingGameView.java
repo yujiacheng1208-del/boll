@@ -170,7 +170,7 @@ public final class RollingGameView extends View {
                     return true;
                 }
                 if (tutorialHintOpen) {
-                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.40f, true)) {
+                    if (isButtonTap(event.getX(), event.getY(), getWidth()*.5f, getHeight()*.49f, true)) {
                         tutorialHintOpen = false;
                         tutorialStage = 2;
                         lastFrameAt = SystemClock.elapsedRealtime();
@@ -838,7 +838,7 @@ public final class RollingGameView extends View {
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(density); p.setColor(0x99FFE28A);
         c.drawRoundRect(w*.12f, h*.09f, w*.88f, h*.19f, 18f*density, 18f*density, p); p.setStyle(Paint.Style.FILL);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(14f*density); p.setColor(0xFFFFD76A);
-        String headline = tutorialStage < 2 ? "黄色球 · 安全路线" : colourName(tutorialTargetColour) + "球 · 寻找" + colourName(tutorialTargetColour) + "方块";
+        String headline = tutorialStage < 2 ? "黄色球 · 安全路线" : "目标 · " + colourName(tutorialTargetColour);
         c.drawText(headline, cx, h*.128f, p);
         p.setTextSize(11f*density); p.setColor(0xFFD8E8D0);
         c.drawText(tutorialStage < 2 ? "变色后，只能走相同颜色的方块" : "其他颜色方块会导致失败", cx, h*.163f, p);
@@ -850,21 +850,21 @@ public final class RollingGameView extends View {
         // Leave most of the route visible: this is a guide pinned above it rather
         // than a blocking dialogue.
         p.setColor(0x26000000); c.drawRect(0, 0, w, h, p);
-        p.setShader(new LinearGradient(w*.11f, h*.18f, w*.89f, h*.47f,
+        p.setShader(new LinearGradient(w*.11f, h*.20f, w*.89f, h*.60f,
                 new int[]{0xF0183441, 0xF00A1620, 0xE820123C}, null, Shader.TileMode.CLAMP));
-        c.drawRoundRect(w*.11f, h*.18f, w*.89f, h*.47f, 26f*density, 26f*density, p);
+        c.drawRoundRect(w*.11f, h*.20f, w*.89f, h*.60f, 26f*density, 26f*density, p);
         p.setShader(null);
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(0xFF6DEAF5);
-        c.drawRoundRect(w*.11f, h*.18f, w*.89f, h*.47f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
-        p.setColor(tutorialTargetColour); c.drawCircle(cx, h*.255f, 19f*density, p);
+        c.drawRoundRect(w*.11f, h*.20f, w*.89f, h*.60f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setColor(tutorialTargetColour); c.drawCircle(cx, h*.275f, 19f*density, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(21f*density); p.setColor(Color.WHITE);
-        c.drawText("变色格教学", cx, h*.32f, p);
-        p.setTextSize(13f*density); p.setColor(0xFFC6E4E9);
-        c.drawText("保持在中间轨道 → 穿过前方" + colourName(tutorialTargetColour) + "方块", cx, h*.365f, p);
-        c.drawText("小球会变" + colourName(tutorialTargetColour) + "，之后只能走同色方块", cx, h*.392f, p);
+        c.drawText("变色格教学", cx, h*.34f, p);
+        p.setTextSize(12f*density); p.setColor(0xFFC6E4E9);
+        c.drawText("保持中间轨道，穿过前方" + colourName(tutorialTargetColour) + "方块", cx, h*.39f, p);
+        c.drawText("小球变色后，只能走同色方块", cx, h*.42f, p);
         // A small direction marker keeps the player's focus on the visible route.
-        p.setColor(tutorialTargetColour); path.reset(); path.moveTo(cx, h*.50f); path.lineTo(cx-10f*density, h*.475f); path.lineTo(cx+10f*density, h*.475f); path.close(); c.drawPath(path, p);
-        drawButton(c, cx, h*.40f, "继续前进");
+        drawButton(c, cx, h*.49f, "继续前进");
+        p.setColor(tutorialTargetColour); path.reset(); path.moveTo(cx, h*.57f); path.lineTo(cx-10f*density, h*.545f); path.lineTo(cx+10f*density, h*.545f); path.close(); c.drawPath(path, p);
         p.setTextAlign(Paint.Align.LEFT);
     }
 
@@ -1367,7 +1367,7 @@ public final class RollingGameView extends View {
         if (settingsOpen && !failed && !completed) drawSettings(c, w, h);
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
-        if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed) drawTutorialGuide(c, w, h, elapsed);
+        if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed && !tutorialHintOpen && !tutorialCompleteOpen) drawTutorialGuide(c, w, h, elapsed);
         if (tutorialHintOpen && gameStartedAt >= 0L) drawTutorialSwitchPrompt(c, w, h);
         if (tutorialCompleteOpen && gameStartedAt >= 0L) drawTutorialComplete(c, w, h, elapsed);
         if (countdownEndsAt != 0L && gameStartedAt >= 0L) {
