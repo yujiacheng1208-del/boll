@@ -1,6 +1,6 @@
 {
-  "versionCode": 634,
-  "versionName": "6.34",
-  "notes": "教学完成两种玩法后新增彩带通关页，可直接进入关卡模式",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@2b45730fb4d9a7b0d716604ac4c1fe252cf07093/releases/tianji-rolling-ball.apk"
+  "versionCode": 635,
+  "versionName": "6.35",
+  "notes": "优化教学模式排版，解决攻略卡片文字与按钮重叠",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@f736c68059b3c594d3326e0435f6683ca9eca0a0/releases/tianji-rolling-ball.apk"
 }
