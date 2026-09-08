@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
 
 /** A stationary rolling ball while the narrow track streams toward the camera. */
@@ -72,6 +73,8 @@ public final class RollingGameView extends View {
     private long colourBonusAt = 0L;
     private int colourBonusColor = CENTRE_EDGE;
     private long mapSeed = 1L;
+    private long renderJumpCount = Long.MIN_VALUE;
+    private final HashMap<Long, Integer> lockedSwitchColours = new HashMap<>();
     private int score = 0;
     private boolean settingsOpen = false;
     private float sensitivity = 1f;
@@ -577,6 +580,7 @@ public final class RollingGameView extends View {
         // A fresh seed makes every new run's colour rows and cyan segments unique,
         // while preserving a stable layout throughout that one run.
         mapSeed = System.nanoTime() ^ (gameStartedAt * 1103515245L);
+        lockedSwitchColours.clear();
         frozenElapsed = 0L;
         gameElapsed = 0L;
         lastFrameAt = gameStartedAt;
@@ -961,15 +965,23 @@ public final class RollingGameView extends View {
     }
 
     private int optionalColour(long tileId) {
+        Integer locked = lockedSwitchColours.get(tileId);
+        if (locked != null) return locked;
         int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
         long hash = mapHash(tileId * 1103515245L + 67891L);
         int start = (int)Math.floorMod(hash >>> 9, 3L);
         // A switch tile must visibly offer a new colour, never the ball's current one.
         for (int offset = 0; offset < colours.length; offset++) {
             int candidate = colours[(start + offset) % colours.length];
-            if (candidate != requiredColour) return candidate;
+            if (candidate != requiredColour) {
+                // Lock nearby tiles before their landing can change the ball colour.
+                if (tileId <= renderJumpCount + 1L) lockedSwitchColours.put(tileId, candidate);
+                return candidate;
+            }
         }
-        return colours[start];
+        int fallback = colours[start];
+        if (tileId <= renderJumpCount + 1L) lockedSwitchColours.put(tileId, fallback);
+        return fallback;
     }
 
     private int tileColor(long tileId, int lane) {
@@ -1080,6 +1092,7 @@ public final class RollingGameView extends View {
         // Repeating exactly one spacing per jump is seamless: the next tile takes
         // the previous tile's place, so the path never runs out over time.
         float tileTravel = jumpPhase * tileSpacing;
+        renderJumpCount = jumpCount;
         for (int i=-28; i<=28; i++) {
             float zCenter = landingZ + i * tileSpacing + tileTravel;
             float zTop = zCenter - tileHalfDepth;
