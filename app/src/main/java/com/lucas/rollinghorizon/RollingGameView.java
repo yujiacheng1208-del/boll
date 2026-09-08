@@ -30,6 +30,8 @@ public final class RollingGameView extends View {
     private static final int MODE_ENDLESS = 2;
     private static final int MODE_TUTORIAL = 3;
     private static final long FIRST_COLOUR_TILE = 6L;
+    private static final long TUTORIAL_SWITCH_TILE = 20L;
+    private static final long TUTORIAL_GUIDE_TILE = TUTORIAL_SWITCH_TILE - 1L;
     private static final int EASY = 0;
     private static final int MEDIUM = 1;
     private static final int HARD = 2;
@@ -831,10 +833,10 @@ public final class RollingGameView extends View {
         c.drawRoundRect(w*.11f, h*.34f, w*.89f, h*.68f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
         p.setColor(ORANGE_EDGE); c.drawCircle(cx, h*.425f, 19f*density, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(21f*density); p.setColor(Color.WHITE);
-        c.drawText("颜色变换", cx, h*.49f, p);
+        c.drawText("路线攻略", cx, h*.49f, p);
         p.setTextSize(13f*density); p.setColor(0xFFC6E4E9);
-        c.drawText("小球走过青色方块后会变为青色", cx, h*.535f, p);
-        c.drawText("随后只能前进在青色方块上", cx, h*.565f, p);
+        c.drawText("前方青色方块即将到达，保持中间轨道", cx, h*.535f, p);
+        c.drawText("走过后小球变青色，只能走青色方块", cx, h*.565f, p);
         drawButton(c, cx, h*.63f, "继续前进");
         p.setTextAlign(Paint.Align.LEFT);
     }
@@ -973,9 +975,9 @@ public final class RollingGameView extends View {
     private int tileColor(long tileId, int lane) {
         if (gameMode == MODE_TUTORIAL) {
             // A safe yellow stretch, one cyan switch, then a cyan centre target.
-            if (tileId < 10L || tileId == 11L || tileId == 12L) return CENTRE_EDGE;
-            if (tileId == 10L) return lane == 0 ? ORANGE_EDGE : CENTRE_EDGE;
-            if (tileId == 13L) return lane < 0 ? RED_EDGE : lane > 0 ? PINK_EDGE : ORANGE_EDGE;
+            if (tileId < TUTORIAL_SWITCH_TILE || tileId == TUTORIAL_SWITCH_TILE + 1L || tileId == TUTORIAL_SWITCH_TILE + 2L) return CENTRE_EDGE;
+            if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? ORANGE_EDGE : CENTRE_EDGE;
+            if (tileId == TUTORIAL_SWITCH_TILE + 3L) return lane < 0 ? RED_EDGE : lane > 0 ? PINK_EDGE : ORANGE_EDGE;
         }
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
@@ -992,7 +994,7 @@ public final class RollingGameView extends View {
     }
 
     private boolean isSwitchTile(long tileId) {
-        return (gameMode == MODE_TUTORIAL && tileId == 10L) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
+        return (gameMode == MODE_TUTORIAL && tileId == TUTORIAL_SWITCH_TILE) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
     }
     @Override protected void onDraw(Canvas c) {
         super.onDraw(c);
@@ -1039,7 +1041,7 @@ public final class RollingGameView extends View {
         float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp) * 1.5f;
         long jumpCount = (long)Math.floor(cycleCount);
         float jumpPhase = cycleCount - jumpCount;
-        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && jumpCount >= 10L) {
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && jumpCount >= TUTORIAL_GUIDE_TILE) {
             tutorialStage = 1;
             tutorialHintOpen = true;
             lastFrameAt = now;
