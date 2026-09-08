@@ -793,39 +793,52 @@ public final class RollingGameView extends View {
                 (int)(Color.blue(color) * factor));
     }
 
-    /** The base colour-row rhythm tightens as play advances. */
-    private static boolean baseColourRow(long tileId) {
-        if (tileId < 4L) return false;
-        long relative = tileId - 4L;
-        int interval;
-        long sectionStart;
-        int randomChance;
-        if (relative < 60L) {
-            interval = 6; sectionStart = 0L; randomChance = 11;
-        } else if (relative < 180L) {
-            interval = 5; sectionStart = 60L; randomChance = 8;
-        } else if (relative < 360L) {
-            interval = 4; sectionStart = 180L; randomChance = 6;
-        } else {
-            interval = 3; sectionStart = 360L; randomChance = 5;
+    private static final int ROW_CYAN = 0;
+    private static final int ROW_COLOUR = 1;
+    private static final int ROW_OPTIONAL_SWITCH = 2;
+
+    /** A group is one colour row plus two cyan rows; some groups add a third cyan row. */
+    private static long groupStartFor(long tileId) {
+        long start = 4L, group = 0L;
+        while (tileId >= start) {
+            long hash = group * 1103515245L + 12345L;
+            boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
+            long next = start + (extended ? 4L : 3L);
+            if (tileId < next) return start;
+            start = next; group++;
         }
-        long random = tileId * 1103515245L + 12345L;
-        return Math.floorMod(relative - sectionStart, interval) == 0L
-                || Math.floorMod(random ^ (random >>> 13), randomChance) == 0L;
+        return -1L;
     }
 
-    private static boolean colourRow(long tileId, int difficulty) {
-        if (!baseColourRow(tileId)) return false;
-        if (difficulty == EASY && baseColourRow(tileId - 1L)) return false;
-        return !(difficulty != EASY && baseColourRow(tileId - 1L) && baseColourRow(tileId - 2L));
+    private static int rowKind(long tileId) {
+        if (tileId < 4L) return ROW_CYAN;
+        long start = groupStartFor(tileId);
+        if (tileId == start) return ROW_COLOUR;
+        long group = 0L, probe = 4L;
+        while (probe < start) {
+            long hash = group * 1103515245L + 12345L;
+            probe += Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L ? 4L : 3L;
+            group++;
+        }
+        long hash = group * 1103515245L + 12345L;
+        boolean extended = Math.floorMod(hash ^ (hash >>> 13), 4L) == 0L;
+        // In a three-cyan group, the second cyan row has the optional middle tile.
+        return extended && tileId == start + 2L ? ROW_OPTIONAL_SWITCH : ROW_CYAN;
     }
 
-    private static int tileColor(long tileId, int lane, int difficulty) {
-        if (!colourRow(tileId, difficulty)) return CENTRE_EDGE;
-        // On the optional adjacent colour row, retain the exact lane order so a
-        // matching colour can never move directly from the far-left to far-right.
-        long layoutTile = colourRow(tileId - 1L, difficulty) ? tileId - 1L : tileId;
-        long colourRowIndex = layoutTile - 4L;
+    private static int optionalColour(long tileId, int currentColour) {
+        int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
+        int current = 0;
+        for (int i = 0; i < colours.length; i++) if (colours[i] == currentColour) current = i;
+        long hash = tileId * 1103515245L + 67891L;
+        return colours[(current + 1 + (int)Math.floorMod(hash >>> 9, 2L)) % 3];
+    }
+
+    private static int tileColor(long tileId, int lane, int currentColour) {
+        int kind = rowKind(tileId);
+        if (kind == ROW_CYAN) return CENTRE_EDGE;
+        if (kind == ROW_OPTIONAL_SWITCH) return lane == 0 ? optionalColour(tileId, currentColour) : CENTRE_EDGE;
+        long colourRowIndex = groupStartFor(tileId) - 4L;
         long hash = colourRowIndex * 1103515245L + 67891L;
         hash ^= hash >>> 16;
         int laneOrder = lane + 1;
@@ -927,7 +940,7 @@ public final class RollingGameView extends View {
                 path.reset(); path.moveTo(xTop-halfTop, yTop); path.lineTo(xTop+halfTop, yTop);
                 path.lineTo(xBottom+halfBottom, yBottom); path.lineTo(xBottom-halfBottom, yBottom); path.close();
                 long tileId = jumpCount - i;
-                int edge = tileColor(tileId, lane, activeDifficulty);
+                int edge = tileColor(tileId, lane, requiredColour);
                 p.setColor(dim(edge, .22f)); c.drawPath(path, p);
                 p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(edge);
                 c.drawPath(path, p); p.setStyle(Paint.Style.FILL);
@@ -940,7 +953,7 @@ public final class RollingGameView extends View {
         // The two gaps between the three lanes are protected by invisible air walls.
         // Only travelling beyond either outside lane can send the ball into the void.
         int currentLane = Math.round(Math.max(-1f, Math.min(1f, lanePosition)));
-        int landingColour = tileColor(jumpCount, currentLane, activeDifficulty);
+        int landingColour = tileColor(jumpCount, currentLane, requiredColour);
         // Only a completed jump counts. The opening colour tile selects the rule;
         // later cyan tiles are safe, while another colour must match the selection.
         if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
@@ -950,6 +963,11 @@ public final class RollingGameView extends View {
                 falling = true;
                 fallStartedAt = now;
                 frozenElapsed = elapsed;
+            } else if (rowKind(jumpCount) == ROW_OPTIONAL_SWITCH && currentLane == 0) {
+                // The middle tile on an extended cyan group is optional: stepping on
+                // it changes the active colour, while passing it keeps the old one.
+                requiredColour = landingColour;
+                ballTint = landingColour;
             } else if (landingColour != CENTRE_EDGE) {
                 if (!colourChosen) {
                     colourChosen = true;

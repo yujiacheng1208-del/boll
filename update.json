@@ -1,6 +1,6 @@
 {
-  "versionCode": 604,
-  "versionName": "6.4",
-  "notes": "优化更新界面与下载安装流程",
+  "versionCode": 605,
+  "versionName": "6.5",
+  "notes": "新增可选变色轨道与固定青色节奏",
   "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/releases/tianji-rolling-ball.apk"
 }
