@@ -1,6 +1,6 @@
 {
-  "versionCode": 613,
-  "versionName": "6.13",
-  "notes": "轨道方块改为整块颜色填充，减轻视觉疲劳",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=613"
+  "versionCode": 614,
+  "versionName": "6.14",
+  "notes": "降低跳跃幅度；踩中变色方块额外加 10 分并显示彩色提示",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=614"
 }

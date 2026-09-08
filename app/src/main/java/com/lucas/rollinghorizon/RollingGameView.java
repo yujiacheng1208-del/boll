@@ -64,6 +64,8 @@ public final class RollingGameView extends View {
     private long landingEffectAt = 0L;
     private int landingEffectLane = 0;
     private int landingEffectColor = CENTRE_EDGE;
+    private long colourBonusAt = 0L;
+    private int colourBonusColor = CENTRE_EDGE;
     private int score = 0;
     private boolean settingsOpen = false;
     private float sensitivity = 1f;
@@ -543,6 +545,7 @@ public final class RollingGameView extends View {
         falling = false;
         fallStartedAt = 0L;
         lastLanding = 0L;
+        colourBonusAt = 0L;
         score = 0;
         settingsOpen = false;
         colourChoiceOpen = true;
@@ -565,6 +568,7 @@ public final class RollingGameView extends View {
         colourChoiceOpen = false;
         difficultyChoiceOpen = false;
         confirmHomeOpen = false;
+        colourBonusAt = 0L;
         score = 0;
         lanePosition = 0f;
         targetLane = 0f;
@@ -995,6 +999,13 @@ public final class RollingGameView extends View {
             }
             if (!failed && !falling) {
                 score++;
+                // A coloured landing earns a clear bonus. Cyan remains the neutral
+                // safe route and does not produce a score pop-up.
+                if (landingColour != CENTRE_EDGE) {
+                    score += 10;
+                    colourBonusAt = now;
+                    colourBonusColor = landingColour;
+                }
                 savePlayerProgress(progress);
                 landingEffectAt = now;
                 landingEffectLane = currentLane;
@@ -1004,7 +1015,7 @@ public final class RollingGameView extends View {
         // Keep the same cycle length, but ease both take-off and landing so the
         // vertical movement is smooth instead of snapping into a sine arc.
         float jumpSine = (float)Math.sin(jumpPhase * Math.PI);
-        float jumpAmount = jumpSine * jumpSine * h * .105f;
+        float jumpAmount = jumpSine * jumpSine * h * .072f;
         float ballY = groundBallY - jumpAmount;
         if (falling) {
             float fall = Math.min(1f, (now - fallStartedAt) / 500f);
@@ -1061,7 +1072,7 @@ public final class RollingGameView extends View {
         c.drawPath(path, p); p.setShader(null);
 
         // The shadow remains on the track, contracting and fading while the ball is airborne.
-        float heightRatio = falling ? 1f : jumpAmount / (h * .105f);
+        float heightRatio = falling ? 1f : jumpAmount / (h * .072f);
         float shadowY = groundBallY + radius*.78f;
         float shadowHalfWidth = radius * (1.18f - .55f * heightRatio);
         float shadowHalfHeight = radius * (.22f - .10f * heightRatio);
@@ -1078,6 +1089,21 @@ public final class RollingGameView extends View {
             c.drawText(String.valueOf(score), cx, h*.115f, p);
             p.setTextAlign(Paint.Align.LEFT); p.setTextSize(16*density);
             c.drawText(gameMode == MODE_ENDLESS ? "∞" : progress + "%", 20f*density, h*.075f, p);
+        }
+
+        // Keep the coloured-tile reward central, brief, and easy to notice without
+        // attaching any flashing effect to the ball itself.
+        float bonusAge = (now - colourBonusAt) / 720f;
+        if (bonusAge >= 0f && bonusAge < 1f && gameStartedAt >= 0L && !falling) {
+            float rise = bonusAge * 34f * density;
+            int alpha = (int)(255f * (1f - bonusAge));
+            p.setTextAlign(Paint.Align.CENTER);
+            p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            p.setTextSize(42f * density);
+            p.setColor(Color.argb(alpha, Color.red(colourBonusColor), Color.green(colourBonusColor), Color.blue(colourBonusColor)));
+            c.drawText("+10", cx, h*.50f - rise, p);
+            p.setTypeface(Typeface.DEFAULT);
+            p.setTextAlign(Paint.Align.LEFT);
         }
 
         // Minimal gear icon in the upper-right corner.
