@@ -1,6 +1,6 @@
 {
-  "versionCode": 631,
-  "versionName": "6.31",
-  "notes": "延长教学安全路线，并在变色格到达前暂停显示路线攻略",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@0c8d0c2398f93bd5cd9f76aff53e2d9ce3c1bff5/releases/tianji-rolling-ball.apk"
+  "versionCode": 632,
+  "versionName": "6.32",
+  "notes": "修复变色方块被踩后随机变色：现在只改变小球颜色",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@0c7b1e854adf665d163ee7eeed3328383e2bbad8/releases/tianji-rolling-ball.apk"
 }
