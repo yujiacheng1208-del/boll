@@ -141,6 +141,27 @@ public final class RollingGameView extends View {
                     if (gameStartedAt < 0L) showProfileDialog();
                     return true;
                 }
+                // The home-screen gear opens the exact same controls as the
+                // in-game gear; it must be handled before the mode buttons.
+                if (gameStartedAt < 0L && event.getX() > getWidth() - 72f*density && event.getY() < 72f*density) {
+                    settingsOpen = true;
+                    return true;
+                }
+                if (settingsOpen) {
+                    if (event.getY() > getHeight()*.60f && event.getY() < getHeight()*.69f) {
+                        if (gameStartedAt < 0L) {
+                            settingsOpen = false;
+                        } else if (event.getX() < getWidth()*.5f) {
+                            confirmHomeOpen = true;
+                        } else {
+                            settingsOpen = false;
+                            countdownEndsAt = SystemClock.elapsedRealtime() + 3000L;
+                        }
+                        return true;
+                    }
+                    updateSettingsSlider(event.getX(), event.getY());
+                    return true;
+                }
                 if (gameStartedAt < 0L) {
                     if (leaderboardOpen) {
                         leaderboardOpen = false;
@@ -160,16 +181,18 @@ public final class RollingGameView extends View {
                         }
                     } else if (event.getX() < 190f*density && event.getY() > 70f*density && event.getY() < 116f*density) {
                         leaderboardOpen = true;
-                    } else if (event.getY() < getHeight()*.59f) {
+                    } else if (event.getY() > getHeight()*.45f && event.getY() < getHeight()*.55f) {
                         difficultyChoiceOpen = true;
-                    } else if (event.getY() < getHeight()*.67f) {
+                    } else if (event.getY() >= getHeight()*.55f && event.getY() < getHeight()*.64f) {
                         startMode(MODE_ENDLESS);
-                    } else if (currentUser.isEmpty() && event.getY() < getHeight()*.77f) {
+                    } else if (currentUser.isEmpty() && event.getY() >= getHeight()*.64f && event.getY() < getHeight()*.73f) {
                         currentUser = "";
                         preferences.edit().remove(ACTIVE_USER).apply();
                         if (event.getX() < getWidth()*.5f) showRegisterDialog(MODE_NONE);
                         else showLoginDialog(MODE_NONE);
-                    } else if (event.getY() > getHeight()*.78f && event.getY() < getHeight()*.88f && getContext() instanceof Activity) {
+                    } else if (event.getY() >= getHeight()*.73f && event.getY() < getHeight()*.81f) {
+                        settingsOpen = true;
+                    } else if (event.getY() > getHeight()*.81f && event.getY() < getHeight()*.90f && getContext() instanceof Activity) {
                         stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
@@ -210,19 +233,6 @@ public final class RollingGameView extends View {
                     } else if (countdownEndsAt == 0L) {
                         settingsOpen = true;
                     }
-                    return true;
-                }
-                if (settingsOpen) {
-                    if (event.getY() > getHeight()*.60f && event.getY() < getHeight()*.69f) {
-                        if (event.getX() < getWidth()*.5f) {
-                            confirmHomeOpen = true;
-                        } else {
-                            settingsOpen = false;
-                            countdownEndsAt = SystemClock.elapsedRealtime() + 3000L;
-                        }
-                        return true;
-                    }
-                    updateSettingsSlider(event.getX(), event.getY());
                     return true;
                 }
                 if (countdownEndsAt != 0L) return true;
@@ -619,13 +629,14 @@ public final class RollingGameView extends View {
         c.drawText("选择模式，踏上你的颜色之路", cx, h*.375f, p);
         p.setTextSize(12f*density); p.setColor(0xFF6F9BA6);
         c.drawText(currentUser.isEmpty() ? "登录或注册后保存你的战绩" : "当前玩家 · " + currentUser, cx, h*.415f, p);
-        drawButton(c, cx, h*.53f, "关卡模式");
-        drawSecondaryButton(c, cx, h*.62f, "无尽模式");
+        drawButton(c, cx, h*.50f, "关卡模式");
+        drawSecondaryButton(c, cx, h*.59f, "无尽模式");
         if (currentUser.isEmpty()) {
-            drawSecondaryButton(c, w*.30f, h*.72f, "注册");
-            drawSecondaryButton(c, w*.70f, h*.72f, "登录");
+            drawSecondaryButton(c, w*.30f, h*.68f, "注册");
+            drawSecondaryButton(c, w*.70f, h*.68f, "登录");
         }
-        drawSecondaryButton(c, cx, h*.82f, "退出游戏");
+        drawSecondaryButton(c, cx, h*.77f, "设置");
+        drawSecondaryButton(c, cx, h*.85f, "退出游戏");
         drawSecondaryButton(c, 91f*density, 93f*density, "积分榜");
     }
 
@@ -772,9 +783,9 @@ public final class RollingGameView extends View {
         drawSlider(c, w, h, "音乐", musicVolume, h*.41f, Math.round(musicVolume*100) + "%");
         drawSlider(c, w, h, "音效", effectsVolume, h*.53f, Math.round(effectsVolume*100) + "%");
         p.setTextSize(11f*density); p.setColor(0xFF8DB4BD);
-        c.drawText("左右拖动滑杆调整 · 游戏已暂停", cx, h*.585f, p);
+        c.drawText(gameStartedAt >= 0L ? "左右拖动滑杆调整 · 游戏已暂停" : "左右拖动滑杆调整", cx, h*.585f, p);
         drawSecondaryButton(c, w*.33f, h*.65f, "返回主页");
-        drawSecondaryButton(c, w*.67f, h*.65f, "返回游戏");
+        drawSecondaryButton(c, w*.67f, h*.65f, gameStartedAt >= 0L ? "返回游戏" : "关闭设置");
     }
 
     private void drawSlider(Canvas c, float w, float h, String title, float value, float y, String amount) {
@@ -1133,7 +1144,7 @@ public final class RollingGameView extends View {
             failReason = FAIL_VOID;
             frozenElapsed = elapsed;
         }
-        if (settingsOpen && !failed && !completed && gameStartedAt >= 0L) drawSettings(c, w, h);
+        if (settingsOpen && !failed && !completed) drawSettings(c, w, h);
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
         if (countdownEndsAt != 0L && gameStartedAt >= 0L) {
