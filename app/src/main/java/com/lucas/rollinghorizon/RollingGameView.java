@@ -826,18 +826,16 @@ public final class RollingGameView extends View {
         return extended && tileId == start + 2L ? ROW_OPTIONAL_SWITCH : ROW_CYAN;
     }
 
-    private static int optionalColour(long tileId, int currentColour) {
+    private static int optionalColour(long tileId) {
         int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
-        int current = 0;
-        for (int i = 0; i < colours.length; i++) if (colours[i] == currentColour) current = i;
         long hash = tileId * 1103515245L + 67891L;
-        return colours[(current + 1 + (int)Math.floorMod(hash >>> 9, 2L)) % 3];
+        return colours[(int)Math.floorMod(hash >>> 9, 3L)];
     }
 
-    private static int tileColor(long tileId, int lane, int currentColour) {
+    private static int tileColor(long tileId, int lane) {
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
-        if (kind == ROW_OPTIONAL_SWITCH) return lane == 0 ? optionalColour(tileId, currentColour) : CENTRE_EDGE;
+        if (kind == ROW_OPTIONAL_SWITCH) return lane == 0 ? optionalColour(tileId) : CENTRE_EDGE;
         long colourRowIndex = groupStartFor(tileId) - 4L;
         long hash = colourRowIndex * 1103515245L + 67891L;
         hash ^= hash >>> 16;
@@ -940,7 +938,7 @@ public final class RollingGameView extends View {
                 path.reset(); path.moveTo(xTop-halfTop, yTop); path.lineTo(xTop+halfTop, yTop);
                 path.lineTo(xBottom+halfBottom, yBottom); path.lineTo(xBottom-halfBottom, yBottom); path.close();
                 long tileId = jumpCount - i;
-                int edge = tileColor(tileId, lane, requiredColour);
+                int edge = tileColor(tileId, lane);
                 p.setColor(dim(edge, .22f)); c.drawPath(path, p);
                 p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(edge);
                 c.drawPath(path, p); p.setStyle(Paint.Style.FILL);
@@ -953,7 +951,7 @@ public final class RollingGameView extends View {
         // The two gaps between the three lanes are protected by invisible air walls.
         // Only travelling beyond either outside lane can send the ball into the void.
         int currentLane = Math.round(Math.max(-1f, Math.min(1f, lanePosition)));
-        int landingColour = tileColor(jumpCount, currentLane, requiredColour);
+        int landingColour = tileColor(jumpCount, currentLane);
         // Only a completed jump counts. The opening colour tile selects the rule;
         // later cyan tiles are safe, while another colour must match the selection.
         if (gameStartedAt >= 0L && !failed && !completed && !colourChoiceOpen && jumpCount > 0L && jumpCount != lastLanding) {
