@@ -1,6 +1,6 @@
 {
-  "versionCode": 628,
-  "versionName": "6.28",
-  "notes": "新增渐变教学关卡；所有模式黄色起步并自然进入首排彩色方块",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@adc1c2241fef0952ba9bfb92b029f5285fdc1396/releases/tianji-rolling-ball.apk"
+  "versionCode": 629,
+  "versionName": "6.29",
+  "notes": "教学关卡移至关卡模式上方；主页五项主要操作改为等距布局",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@d6a0e57abbfdcc1409f6908f63bcf45883e1b0b6/releases/tianji-rolling-ball.apk"
 }
