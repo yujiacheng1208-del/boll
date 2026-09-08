@@ -109,6 +109,9 @@ public final class RollingGameView extends View {
         }
     }
 
+    public void pauseBackgroundMusic() { pauseMusic(); }
+    public void resumeBackgroundMusic() { startMusic(); }
+
     @Override public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -161,6 +164,7 @@ public final class RollingGameView extends View {
                         if (event.getX() < getWidth()*.5f) showRegisterDialog(MODE_NONE);
                         else showLoginDialog(MODE_NONE);
                     } else if (event.getY() > getHeight()*.78f && event.getY() < getHeight()*.88f && getContext() instanceof Activity) {
+                        stopMusic();
                         ((Activity)getContext()).finishAndRemoveTask();
                     }
                     return true;

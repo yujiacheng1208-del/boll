@@ -33,6 +33,7 @@ public class MainActivity extends Activity {
     private String pendingUpdateUrl = "";
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private boolean installerOpened = false;
+    private RollingGameView gameView;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -45,7 +46,8 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         try {
-            setContentView(new RollingGameView(this));
+            gameView = new RollingGameView(this);
+            setContentView(gameView);
         } catch (Throwable ignored) {
             TextView fallback = new TextView(this);
             fallback.setText("天机滚珠");
@@ -162,9 +164,15 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        if (gameView != null) gameView.resumeBackgroundMusic();
         if (!pendingUpdateUrl.isEmpty() && (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || getPackageManager().canRequestPackageInstalls())) {
             String url = pendingUpdateUrl; pendingUpdateUrl = ""; downloadUpdate(url);
         }
+    }
+
+    @Override protected void onPause() {
+        if (gameView != null) gameView.pauseBackgroundMusic();
+        super.onPause();
     }
 
     @Override protected void onDestroy() {
