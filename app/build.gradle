@@ -5,11 +5,15 @@ android {
     compileSdk 35
     buildToolsVersion '35.0.0'
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'com.lucas.rollinghorizon'
         minSdk 21
         targetSdk 35
-        versionCode 1
-        versionName '0.1'
+        versionCode 600
+        versionName '6.0'
     }
 }
