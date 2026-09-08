@@ -1,6 +1,6 @@
 {
-  "versionCode": 632,
-  "versionName": "6.32",
-  "notes": "修复变色方块被踩后随机变色：现在只改变小球颜色",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@0c7b1e854adf665d163ee7eeed3328383e2bbad8/releases/tianji-rolling-ball.apk"
+  "versionCode": 633,
+  "versionName": "6.33",
+  "notes": "教学开局可选红青粉目标色；变色格和后续路线会跟随所选颜色",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@592bf205c35880dd26d0ddc1c5e9096275cba46b/releases/tianji-rolling-ball.apk"
 }
