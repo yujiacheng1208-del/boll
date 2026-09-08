@@ -131,7 +131,11 @@ public final class RollingGameView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 // The small profile chip is available both on the home screen and in play.
-                if (!currentUser.isEmpty() && event.getX() < 190f*density && event.getY() < 72f*density) {
+                if (!currentUser.isEmpty() && gameStartedAt < 0L && event.getX() > 145f*density && event.getX() < 215f*density && event.getY() < 72f*density) {
+                    if (getContext() instanceof MainActivity) ((MainActivity)getContext()).scanForUpdate();
+                    return true;
+                }
+                if (!currentUser.isEmpty() && event.getX() < 215f*density && event.getY() < 72f*density) {
                     if (gameStartedAt < 0L) showProfileDialog();
                     return true;
                 }
@@ -676,12 +680,15 @@ public final class RollingGameView extends View {
         int[] colours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
         int avatar = preferences.getInt("avatar_" + currentUser, 0) % colours.length;
         float x = 34f*density, y = 34f*density, r = 18f*density;
-        p.setColor(0xB80A1821); c.drawRoundRect(10f*density, 10f*density, 174f*density, 58f*density, 24f*density, 24f*density, p);
+        p.setColor(0xB80A1821); c.drawRoundRect(10f*density, 10f*density, 214f*density, 58f*density, 24f*density, 24f*density, p);
         p.setColor(colours[avatar]); c.drawCircle(x, y, r, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(17f*density); p.setColor(Color.WHITE);
         c.drawText(currentUser.substring(0, 1), x, y + 6f*density, p);
         p.setTextAlign(Paint.Align.LEFT); p.setTextSize(13f*density); p.setColor(Color.WHITE);
         c.drawText(currentUser, 61f*density, y + 5f*density, p);
+        p.setColor(0xFF1A6070); c.drawRoundRect(151f*density, 18f*density, 204f*density, 50f*density, 14f*density, 14f*density, p);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(11f*density); p.setColor(0xFFE5FCFF);
+        c.drawText("更新", 177.5f*density, y + 4f*density, p);
     }
 
     private void drawHomeConfirm(Canvas c, float w, float h) {

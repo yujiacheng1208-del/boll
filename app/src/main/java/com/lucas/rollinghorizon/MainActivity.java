@@ -57,10 +57,12 @@ public class MainActivity extends Activity {
             fallback.setBackgroundColor(0xFF08111A);
             setContentView(fallback);
         }
-        checkForUpdate();
+        checkForUpdate(false);
     }
 
-    private void checkForUpdate() {
+    public void scanForUpdate() { checkForUpdate(true); }
+
+    private void checkForUpdate(boolean manual) {
         new Thread(() -> {
             try {
                 HttpURLConnection connection = (HttpURLConnection)new URL(UPDATE_INFO_URL).openConnection();
@@ -72,7 +74,11 @@ public class MainActivity extends Activity {
                 JSONObject info = new JSONObject(body.toString());
                 int versionCode = info.optInt("versionCode", 0);
                 String apkUrl = info.optString("apkUrl", "");
-                if (versionCode > BuildConfig.VERSION_CODE && !apkUrl.isEmpty()) runOnUiThread(() -> showUpdate(info, apkUrl));
+                if (versionCode > BuildConfig.VERSION_CODE && !apkUrl.isEmpty()) {
+                    runOnUiThread(() -> showUpdate(info, apkUrl));
+                } else if (manual) {
+                    runOnUiThread(() -> Toast.makeText(this, "当前已是最新版本", Toast.LENGTH_SHORT).show());
+                }
             } catch (Exception ignored) { }
         }).start();
     }
