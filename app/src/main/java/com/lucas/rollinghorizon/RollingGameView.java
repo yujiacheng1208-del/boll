@@ -686,9 +686,18 @@ public final class RollingGameView extends View {
             p.setTextAlign(Paint.Align.LEFT); p.setTextSize(17f*density);
             for (int i = 0; i < shown; i++) {
                 float y = h*(.34f + i*.075f);
+                String user = users.get(i);
+                int[] avatarColours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
+                int avatar = preferences.getInt("avatar_" + user, 0) % avatarColours.length;
+                float avatarX = w*.285f;
+                p.setColor(avatarColours[avatar]); c.drawCircle(avatarX, y-6f*density, 13f*density, p);
+                p.setTextAlign(Paint.Align.CENTER); p.setTextSize(12f*density); p.setColor(Color.WHITE);
+                c.drawText(user.substring(0, 1), avatarX, y-2f*density, p);
+                p.setTextAlign(Paint.Align.LEFT); p.setTextSize(17f*density);
                 p.setColor(i == 0 ? 0xFFFFC65B : Color.WHITE);
-                c.drawText((i+1) + ".  " + users.get(i), w*.22f, y, p);
-                p.setTextAlign(Paint.Align.RIGHT); c.drawText(String.valueOf(preferences.getInt("endless_" + users.get(i), 0)), w*.78f, y, p);
+                c.drawText((i+1) + ".", w*.17f, y, p);
+                c.drawText(user, w*.34f, y, p);
+                p.setTextAlign(Paint.Align.RIGHT); c.drawText(String.valueOf(preferences.getInt("endless_" + user, 0)), w*.78f, y, p);
                 p.setTextAlign(Paint.Align.LEFT);
             }
         }
