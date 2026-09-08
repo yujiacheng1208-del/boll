@@ -988,7 +988,10 @@ public final class RollingGameView extends View {
                 landingEffectColor = ballTint;
             }
         }
-        float jumpAmount = (float)Math.sin(jumpPhase * Math.PI) * h * .105f;
+        // Keep the same cycle length, but ease both take-off and landing so the
+        // vertical movement is smooth instead of snapping into a sine arc.
+        float jumpSine = (float)Math.sin(jumpPhase * Math.PI);
+        float jumpAmount = jumpSine * jumpSine * h * .105f;
         float ballY = groundBallY - jumpAmount;
         if (falling) {
             float fall = Math.min(1f, (now - fallStartedAt) / 500f);

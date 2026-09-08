@@ -1,6 +1,6 @@
 {
-  "versionCode": 609,
-  "versionName": "6.9",
-  "notes": "更新下载源已切换至高速 CDN",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=609"
+  "versionCode": 610,
+  "versionName": "6.10",
+  "notes": "优化球体跳跃的平滑度",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@main/releases/tianji-rolling-ball.apk?v=610"
 }
