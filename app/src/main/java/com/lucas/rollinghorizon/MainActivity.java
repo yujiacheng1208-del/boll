@@ -8,12 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.view.Window;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,6 +28,7 @@ public class MainActivity extends Activity {
     private static final String UPDATE_INFO_URL = "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/update.json";
     private long updateDownloadId = -1L;
     private BroadcastReceiver updateReceiver;
+    private String pendingUpdateUrl = "";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -67,12 +72,34 @@ public class MainActivity extends Activity {
     }
 
     private void showUpdate(JSONObject info, String apkUrl) {
-        new AlertDialog.Builder(this).setTitle("发现新版本 " + info.optString("versionName", ""))
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("发现新版本 " + info.optString("versionName", ""))
                 .setMessage(info.optString("notes", "优化游戏体验"))
-                .setNegativeButton("稍后", null).setPositiveButton("立即更新", (d, w) -> downloadUpdate(apkUrl)).show();
+                .setNegativeButton("稍后", null).setPositiveButton("立即更新", (d, w) -> downloadUpdate(apkUrl)).create();
+        dialog.setOnShowListener(ignored -> styleUpdateDialog(dialog));
+        dialog.show();
+    }
+
+    private void styleUpdateDialog(AlertDialog dialog) {
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0xFFD7F0F1));
+        if (dialog.getButton(AlertDialog.BUTTON_NEGATIVE) != null) dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xFF071C22);
+        if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFF071C22);
     }
 
     private void downloadUpdate(String apkUrl) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !getPackageManager().canRequestPackageInstalls()) {
+            pendingUpdateUrl = apkUrl;
+            AlertDialog dialog = new AlertDialog.Builder(this).setTitle("允许安装更新")
+                    .setMessage("请允许天机滚珠安装下载的新版本，然后会自动继续更新。")
+                    .setNegativeButton("取消", null).setPositiveButton("前往授权", (d, w) -> {
+                        Intent settings = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                Uri.parse("package:" + getPackageName()));
+                        startActivity(settings);
+                    }).create();
+            dialog.setOnShowListener(ignored -> styleUpdateDialog(dialog));
+            dialog.show();
+            return;
+        }
+        ensureUpdateReceiver();
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(apkUrl));
         request.setTitle("天机滚珠更新"); request.setDescription("正在下载新版本");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -80,19 +107,34 @@ public class MainActivity extends Activity {
         DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
         updateDownloadId = manager.enqueue(request);
         Toast.makeText(this, "正在下载更新", Toast.LENGTH_SHORT).show();
-        if (updateReceiver == null) {
-            updateReceiver = new BroadcastReceiver() {
-                @Override public void onReceive(Context context, Intent intent) {
-                    if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L) != updateDownloadId) return;
-                    Uri apk = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).getUriForDownloadedFile(updateDownloadId);
-                    if (apk != null) {
+    }
+
+    private void ensureUpdateReceiver() {
+        if (updateReceiver != null) return;
+        updateReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L) != updateDownloadId) return;
+                Uri apk = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).getUriForDownloadedFile(updateDownloadId);
+                if (apk != null) {
+                    try {
                         Intent install = new Intent(Intent.ACTION_VIEW).setDataAndType(apk, "application/vnd.android.package-archive")
                                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         startActivity(install);
+                    } catch (RuntimeException error) {
+                        Toast.makeText(MainActivity.this, "无法打开安装程序", Toast.LENGTH_LONG).show();
                     }
-                }
-            };
-            registerReceiver(updateReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                } else Toast.makeText(MainActivity.this, "更新下载失败，请稍后重试", Toast.LENGTH_LONG).show();
+            }
+        };
+        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        else registerReceiver(updateReceiver, filter);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (!pendingUpdateUrl.isEmpty() && (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || getPackageManager().canRequestPackageInstalls())) {
+            String url = pendingUpdateUrl; pendingUpdateUrl = ""; downloadUpdate(url);
         }
     }
 

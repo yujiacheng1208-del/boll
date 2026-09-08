@@ -13,7 +13,7 @@ android {
         applicationId 'com.lucas.rollinghorizon'
         minSdk 21
         targetSdk 35
-        versionCode 603
-        versionName '6.3'
+        versionCode 604
+        versionName '6.4'
     }
 }

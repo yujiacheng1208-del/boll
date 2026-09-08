@@ -1,6 +1,6 @@
 {
-  "versionCode": 603,
-  "versionName": "6.3",
-  "notes": "三条轨道之间新增空气墙保护",
+  "versionCode": 604,
+  "versionName": "6.4",
+  "notes": "优化更新界面与下载安装流程",
   "apkUrl": "https://raw.githubusercontent.com/yujiacheng1208-del/boll/main/releases/tianji-rolling-ball.apk"
 }
