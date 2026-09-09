@@ -1308,6 +1308,24 @@ public final class RollingGameView extends View {
             }
         }
 
+        // Subtle side-light ribbons converge toward the horizon to frame the
+        // route like a distant passage, without becoming part of the track.
+        p.setShader(new LinearGradient(w*.40f, horizon, 0f, h,
+                new int[]{0x0037DFF1, 0x2A37DFF1}, null, Shader.TileMode.CLAMP));
+        path.reset(); path.moveTo(w*.40f, horizon + 8f*density); path.lineTo(0f, h*.98f);
+        path.lineTo(w*.095f, h*.98f); path.close(); c.drawPath(path, p);
+        p.setShader(new LinearGradient(w*.60f, horizon, w, h,
+                new int[]{0x0037DFF1, 0x2A37DFF1}, null, Shader.TileMode.CLAMP));
+        path.reset(); path.moveTo(w*.60f, horizon + 8f*density); path.lineTo(w, h*.98f);
+        path.lineTo(w*.905f, h*.98f); path.close(); c.drawPath(path, p); p.setShader(null);
+        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(.8f*density); p.setColor(0x6637DFF1);
+        c.drawLine(w*.40f, horizon + 8f*density, w*.04f, h*.98f, p);
+        c.drawLine(w*.60f, horizon + 8f*density, w*.96f, h*.98f, p);
+        p.setStrokeWidth(.45f*density); p.setColor(0x3DFFE6A0);
+        c.drawLine(w*.35f, horizon + 5f*density, w*.13f, h*.91f, p);
+        c.drawLine(w*.65f, horizon + 5f*density, w*.87f, h*.91f, p);
+        p.setStyle(Paint.Style.FILL);
+
         // Individual floating tiles replace the continuous track and stream under
         // the grounded ball, making the motion read as rolling rather than hopping.
         float groundBallY = h*.72f;
