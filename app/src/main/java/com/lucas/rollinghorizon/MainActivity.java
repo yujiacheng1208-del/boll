@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.io.File;
 
 public class MainActivity extends Activity {
     private static final String UPDATE_INFO_URL = "https://api.github.com/repos/yujiacheng1208-del/boll/contents/update.json?ref=main";
@@ -168,7 +169,26 @@ public class MainActivity extends Activity {
     private void openDownloadedInstaller() {
         if (installerOpened) return;
         installerOpened = true;
-        Uri apk = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).getUriForDownloadedFile(updateDownloadId);
+        DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        int expectedVersion = getSharedPreferences(UPDATE_STATE, MODE_PRIVATE)
+                .getInt(EXPECTED_UPDATE_VERSION, 0);
+        File downloadedApk = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                "tianji-rolling-ball-update-" + Math.max(1, expectedVersion) + ".apk");
+        android.content.pm.PackageInfo packageInfo = getPackageManager()
+                .getPackageArchiveInfo(downloadedApk.getAbsolutePath(), 0);
+        long actualVersion = packageInfo == null ? -1L : (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                ? packageInfo.getLongVersionCode() : packageInfo.versionCode);
+        // Never hand Android an APK other than the version named in the update
+        // dialog. This protects against a stale CDN/download cache response.
+        if (expectedVersion > 0 && actualVersion != expectedVersion) {
+            installerOpened = false;
+            manager.remove(updateDownloadId);
+            getSharedPreferences(UPDATE_STATE, MODE_PRIVATE).edit()
+                    .remove(EXPECTED_UPDATE_VERSION).apply();
+            Toast.makeText(this, "更新包版本校验失败，请重新检测更新", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Uri apk = manager.getUriForDownloadedFile(updateDownloadId);
         if (apk != null) {
             try {
                 Intent install = new Intent(Intent.ACTION_VIEW).setDataAndType(apk, "application/vnd.android.package-archive")
