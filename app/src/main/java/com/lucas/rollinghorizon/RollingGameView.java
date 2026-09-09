@@ -1308,23 +1308,27 @@ public final class RollingGameView extends View {
             }
         }
 
-        // Subtle side-light ribbons converge toward the horizon to frame the
-        // route like a distant passage, without becoming part of the track.
-        p.setShader(new LinearGradient(w*.40f, horizon, 0f, h,
-                new int[]{0x0037DFF1, 0x2A37DFF1}, null, Shader.TileMode.CLAMP));
-        path.reset(); path.moveTo(w*.40f, horizon + 8f*density); path.lineTo(0f, h*.98f);
-        path.lineTo(w*.095f, h*.98f); path.close(); c.drawPath(path, p);
-        p.setShader(new LinearGradient(w*.60f, horizon, w, h,
-                new int[]{0x0037DFF1, 0x2A37DFF1}, null, Shader.TileMode.CLAMP));
-        path.reset(); path.moveTo(w*.60f, horizon + 8f*density); path.lineTo(w, h*.98f);
-        path.lineTo(w*.905f, h*.98f); path.close(); c.drawPath(path, p); p.setShader(null);
-        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(.8f*density); p.setColor(0x6637DFF1);
-        c.drawLine(w*.40f, horizon + 8f*density, w*.04f, h*.98f, p);
-        c.drawLine(w*.60f, horizon + 8f*density, w*.96f, h*.98f, p);
-        p.setStrokeWidth(.45f*density); p.setColor(0x3DFFE6A0);
-        c.drawLine(w*.35f, horizon + 5f*density, w*.13f, h*.91f, p);
-        c.drawLine(w*.65f, horizon + 5f*density, w*.87f, h*.91f, p);
-        p.setStyle(Paint.Style.FILL);
+        // Soft segmented navigation lamps replace the hard side beams. They
+        // taper toward the horizon and frame the passage without cutting across it.
+        for (int side = -1; side <= 1; side += 2) {
+            for (int i = 0; i < 10; i++) {
+                float depth = i / 9f;
+                float curve = depth * depth;
+                float x = side < 0 ? w*(.08f + .31f*curve) : w*(.92f - .31f*curve);
+                float y = h*(.92f - .75f*depth);
+                float radiusLight = (.72f + (1f-depth)*1.75f) * density;
+                float pulse = .72f + .18f*(float)Math.sin(t*Math.PI*2 + i*.9f + (side < 0 ? 0f : 1.8f));
+                int alpha = (int)(44f * pulse);
+                p.setColor(Color.argb(alpha, 73, 211, 232));
+                c.drawCircle(x, y, radiusLight*2.4f, p);
+                p.setColor(Color.argb((int)(138f*pulse), 119, 235, 246));
+                c.drawCircle(x, y, radiusLight, p);
+                if (i % 3 == 1) {
+                    p.setColor(Color.argb((int)(116f*pulse), 255, 225, 137));
+                    c.drawCircle(x, y, radiusLight*.38f, p);
+                }
+            }
+        }
 
         // Individual floating tiles replace the continuous track and stream under
         // the grounded ball, making the motion read as rolling rather than hopping.
