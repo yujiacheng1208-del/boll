@@ -136,14 +136,9 @@ public class MainActivity extends Activity {
         DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
         updateDownloadId = manager.enqueue(request);
         installerOpened = false;
-        // Hand the wait screen to Android's own download centre immediately. It
-        // shows real progress and remains reliable even while this app is in the
-        // background; completion still returns straight to the installer below.
-        try {
-            startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
-        } catch (RuntimeException ignored) {
-            Toast.makeText(this, "正在下载更新", Toast.LENGTH_SHORT).show();
-        }
+        // Stay in the app while Android downloads in the background. The watcher
+        // below opens the package installer directly as soon as it completes.
+        Toast.makeText(this, "正在下载更新，完成后将自动打开安装界面", Toast.LENGTH_LONG).show();
         watchUpdateDownload();
     }
 

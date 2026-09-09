@@ -1284,15 +1284,15 @@ public final class RollingGameView extends View {
             p.setShader(new RadialGradient(w*.84f, h*.25f, w*.30f,
                     new int[]{0x102D5167, 0x00000000}, null, Shader.TileMode.CLAMP));
             c.drawCircle(w*.84f, h*.25f, w*.30f, p); p.setShader(null);
-            for (int i = 0; i < 25; i++) {
+            for (int i = 0; i < 52; i++) {
                 float starX = ((i * 73 + 19) % 101) / 100f * w;
-                float starY = h * (.065f + ((i * 31) % 34) / 100f);
+                float starY = h * (.045f + ((i * 31) % 43) / 100f);
                 float glow = .42f + .36f * (float)Math.sin(t * Math.PI * 2 + i * 1.4f);
                 int[] tones = {0xFFB9E7FF, 0xFFE8D6FF, 0xFFFFE4AA};
                 int tone = tones[i % tones.length];
-                p.setColor(Color.argb((int)((i % 7 == 0 ? 100 : 58) * glow), Color.red(tone), Color.green(tone), Color.blue(tone)));
-                c.drawCircle(starX, starY, (i % 7 == 0 ? 1.15f : .48f) * density, p);
-                if (i % 7 == 0) {
+                p.setColor(Color.argb((int)((i % 8 == 0 ? 112 : 66) * glow), Color.red(tone), Color.green(tone), Color.blue(tone)));
+                c.drawCircle(starX, starY, (i % 8 == 0 ? 1.2f : .52f) * density, p);
+                if (i % 8 == 0) {
                     p.setStrokeWidth(.55f*density); c.drawLine(starX-2f*density, starY, starX+2f*density, starY, p);
                     c.drawLine(starX, starY-2f*density, starX, starY+2f*density, p);
                 }
