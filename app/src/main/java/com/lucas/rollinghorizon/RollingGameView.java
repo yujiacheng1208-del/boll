@@ -33,7 +33,9 @@ public final class RollingGameView extends View {
     private static final long FIRST_COLOUR_TILE = 6L;
     private static final long TUTORIAL_SELECTION_TILE = FIRST_COLOUR_TILE;
     private static final long TUTORIAL_SWITCH_TILE = 20L;
-    private static final long TUTORIAL_GUIDE_TILE = TUTORIAL_SWITCH_TILE - 1L;
+    // Pause well before the switch reaches the ball, giving players enough time
+    // to read the lesson and align with the centre lane.
+    private static final long TUTORIAL_GUIDE_TILE = TUTORIAL_SWITCH_TILE - 4L;
     private static final int EASY = 0;
     private static final int MEDIUM = 1;
     private static final int HARD = 2;
@@ -1177,7 +1179,7 @@ public final class RollingGameView extends View {
         boolean tutorialSelectionVisible = jumpCount > TUTORIAL_SELECTION_TILE - 1L
                 || (jumpCount == TUTORIAL_SELECTION_TILE - 1L && jumpPhase >= .62f);
         boolean tutorialSwitchVisible = jumpCount > TUTORIAL_GUIDE_TILE
-                || (jumpCount == TUTORIAL_GUIDE_TILE && jumpPhase >= .62f);
+                || (jumpCount == TUTORIAL_GUIDE_TILE && jumpPhase >= .42f);
         if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && tutorialSelectionVisible) {
             tutorialStage = 1;
             tutorialColourChoiceOpen = true;
