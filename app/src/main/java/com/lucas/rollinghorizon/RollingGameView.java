@@ -1275,14 +1275,27 @@ public final class RollingGameView extends View {
 
         // Pure black space keeps the focus on the line of travel.
         c.drawColor(Color.BLACK);
-        // A sparse, low-contrast star field stays only in the far distance.
+        // A restrained layered star field keeps the void alive while leaving the
+        // route visually quiet and easy to read.
         if (gameStartedAt >= 0L) {
-            for (int i = 0; i < 13; i++) {
+            p.setShader(new RadialGradient(w*.18f, h*.17f, w*.36f,
+                    new int[]{0x18255273, 0x00000000}, null, Shader.TileMode.CLAMP));
+            c.drawCircle(w*.18f, h*.17f, w*.36f, p);
+            p.setShader(new RadialGradient(w*.84f, h*.25f, w*.30f,
+                    new int[]{0x102D5167, 0x00000000}, null, Shader.TileMode.CLAMP));
+            c.drawCircle(w*.84f, h*.25f, w*.30f, p); p.setShader(null);
+            for (int i = 0; i < 25; i++) {
                 float starX = ((i * 73 + 19) % 101) / 100f * w;
-                float starY = h * (.075f + ((i * 31) % 29) / 100f);
-                float glow = .45f + .35f * (float)Math.sin(t * Math.PI * 2 + i * 1.4f);
-                p.setColor(Color.argb((int)(65 * glow), 185, 220, 245));
-                c.drawCircle(starX, starY, (i % 5 == 0 ? 1.05f : .55f) * density, p);
+                float starY = h * (.065f + ((i * 31) % 34) / 100f);
+                float glow = .42f + .36f * (float)Math.sin(t * Math.PI * 2 + i * 1.4f);
+                int[] tones = {0xFFB9E7FF, 0xFFE8D6FF, 0xFFFFE4AA};
+                int tone = tones[i % tones.length];
+                p.setColor(Color.argb((int)((i % 7 == 0 ? 100 : 58) * glow), Color.red(tone), Color.green(tone), Color.blue(tone)));
+                c.drawCircle(starX, starY, (i % 7 == 0 ? 1.15f : .48f) * density, p);
+                if (i % 7 == 0) {
+                    p.setStrokeWidth(.55f*density); c.drawLine(starX-2f*density, starY, starX+2f*density, starY, p);
+                    c.drawLine(starX, starY-2f*density, starX, starY+2f*density, p);
+                }
             }
         }
 
