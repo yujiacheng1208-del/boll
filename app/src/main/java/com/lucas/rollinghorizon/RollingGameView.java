@@ -32,10 +32,12 @@ public final class RollingGameView extends View {
     private static final int MODE_TUTORIAL = 3;
     private static final long FIRST_COLOUR_TILE = 6L;
     private static final long TUTORIAL_SELECTION_TILE = FIRST_COLOUR_TILE;
-    private static final long TUTORIAL_SWITCH_TILE = 20L;
+    // After the first palette row: two yellow rows, one coloured row. The
+    // change tile is embedded in the second row of a four-yellow-row stretch.
+    private static final long TUTORIAL_SWITCH_TILE = 11L;
     // Pause well before the switch reaches the ball, giving players enough time
     // to read the lesson and align with the centre lane.
-    private static final long TUTORIAL_GUIDE_TILE = TUTORIAL_SWITCH_TILE - 4L;
+    private static final long TUTORIAL_GUIDE_TILE = TUTORIAL_SWITCH_TILE - 3L;
     private static final int EASY = 0;
     private static final int MEDIUM = 1;
     private static final int HARD = 2;
@@ -1145,15 +1147,15 @@ public final class RollingGameView extends View {
                 if (lane == 0) return ORANGE_EDGE;
                 return PINK_EDGE;
             }
-            // A safe yellow stretch, one selected-colour switch, then its target route.
-            if (tileId < TUTORIAL_SWITCH_TILE || tileId == TUTORIAL_SWITCH_TILE + 1L || tileId == TUTORIAL_SWITCH_TILE + 2L) return CENTRE_EDGE;
+            // Two yellow rows then a colour row introduce the target route. The
+            // first coloured row is still only a visual preview before switching.
+            if (tileId == TUTORIAL_SELECTION_TILE + 3L) return tutorialTargetRowColour(lane);
+            // The four yellow rows begin at 10; their second middle tile is the
+            // optional colour switch demonstrated by the teaching prompt.
             if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? tutorialTargetColour : CENTRE_EDGE;
-            if (tileId == TUTORIAL_SWITCH_TILE + 3L) {
-                if (lane == 0) return tutorialTargetColour;
-                if (tutorialTargetColour == RED_EDGE) return lane < 0 ? ORANGE_EDGE : PINK_EDGE;
-                if (tutorialTargetColour == ORANGE_EDGE) return lane < 0 ? RED_EDGE : PINK_EDGE;
-                return lane < 0 ? RED_EDGE : ORANGE_EDGE;
-            }
+            if (tileId >= TUTORIAL_SWITCH_TILE + 5L
+                    && Math.floorMod(tileId - (TUTORIAL_SWITCH_TILE + 5L), 3L) == 0L) return tutorialTargetRowColour(lane);
+            return CENTRE_EDGE;
         }
         int kind = rowKind(tileId);
         if (kind == ROW_CYAN) return CENTRE_EDGE;
@@ -1171,6 +1173,13 @@ public final class RollingGameView extends View {
 
     private boolean isSwitchTile(long tileId) {
         return (gameMode == MODE_TUTORIAL && tileId == TUTORIAL_SWITCH_TILE) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
+    }
+
+    private int tutorialTargetRowColour(int lane) {
+        if (lane == 0) return tutorialTargetColour;
+        if (tutorialTargetColour == RED_EDGE) return lane < 0 ? ORANGE_EDGE : PINK_EDGE;
+        if (tutorialTargetColour == ORANGE_EDGE) return lane < 0 ? RED_EDGE : PINK_EDGE;
+        return lane < 0 ? RED_EDGE : ORANGE_EDGE;
     }
 
     private String colourName(int colour) {
@@ -1330,6 +1339,9 @@ public final class RollingGameView extends View {
                 tutorialTargetColour = landingColour;
                 tutorialChoiceHintVisible = false;
                 tutorialStage = 2;
+            } else if (gameMode == MODE_TUTORIAL && jumpCount == TUTORIAL_SELECTION_TILE + 3L) {
+                // This first coloured row confirms the selected route visually;
+                // the ball remains yellow until the centre switch lesson.
             } else if (isSwitchTile(jumpCount) && currentLane == 0) {
                 // The middle tile on an extended cyan group is optional: stepping on
                 // it changes the active colour, while passing it keeps the old one.
