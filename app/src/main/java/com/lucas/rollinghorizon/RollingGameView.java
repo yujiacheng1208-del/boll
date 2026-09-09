@@ -899,6 +899,26 @@ public final class RollingGameView extends View {
         p.setTextAlign(Paint.Align.LEFT);
     }
 
+    private void drawTutorialSwipeHint(Canvas c, float w, float h, long elapsed) {
+        // A light, animated control rail introduces continuous drag movement
+        // without covering the lanes or competing with the tutorial prompts.
+        float cx = w*.5f, y = h*.875f;
+        float wave = (float)Math.sin(elapsed / 430f);
+        int alpha = (int)(110 + 42 * (wave + 1f) * .5f);
+        p.setColor(Color.argb(alpha, 117, 234, 245));
+        p.setStrokeWidth(1.5f*density);
+        c.drawLine(w*.23f, y, w*.77f, y, p);
+        float markerX = cx + wave * w*.15f;
+        p.setColor(Color.argb(190, 255, 214, 106));
+        c.drawCircle(markerX, y, 5f*density, p);
+        p.setColor(Color.argb(alpha, 117, 234, 245));
+        path.reset(); path.moveTo(w*.18f, y); path.lineTo(w*.23f, y-6f*density); path.lineTo(w*.23f, y+6f*density); path.close(); c.drawPath(path, p);
+        path.reset(); path.moveTo(w*.82f, y); path.lineTo(w*.77f, y-6f*density); path.lineTo(w*.77f, y+6f*density); path.close(); c.drawPath(path, p);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(11f*density); p.setColor(0xFFD0EDF0);
+        c.drawText("左右滑动屏幕，控制小球移动", cx, y + 27f*density, p);
+        p.setTextAlign(Paint.Align.LEFT);
+    }
+
     private void drawTutorialSwitchPrompt(Canvas c, float w, float h) {
         float cx = w*.5f;
         // Leave most of the route visible: this is a guide pinned above it rather
@@ -1441,6 +1461,7 @@ public final class RollingGameView extends View {
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
         if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed && !tutorialHintOpen && !tutorialCompleteOpen && !tutorialColourChoiceOpen) drawTutorialGuide(c, w, h, elapsed);
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && gameStartedAt >= 0L && !tutorialColourChoiceOpen) drawTutorialSwipeHint(c, w, h, elapsed);
         if (tutorialColourChoiceOpen && gameStartedAt >= 0L) drawTutorialColourChoice(c, w, h);
         if (tutorialHintOpen && gameStartedAt >= 0L) drawTutorialSwitchPrompt(c, w, h);
         if (tutorialCompleteOpen && gameStartedAt >= 0L) drawTutorialComplete(c, w, h, elapsed);
