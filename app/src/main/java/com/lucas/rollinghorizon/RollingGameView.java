@@ -1336,14 +1336,16 @@ public final class RollingGameView extends View {
                 fallStartedAt = now;
                 frozenElapsed = elapsed;
             } else if (gameMode == MODE_TUTORIAL && jumpCount == TUTORIAL_SELECTION_TILE) {
-                // The first colour row is selected by steering into a lane. The
-                // ball stays yellow until the later centre switch demonstrates it.
+                // The first colour row is selected by steering into a lane. A
+                // non-yellow landing always gives the tutorial ball that colour.
                 tutorialTargetColour = landingColour;
+                ballTint = landingColour;
                 tutorialChoiceHintVisible = false;
                 tutorialStage = 2;
             } else if (gameMode == MODE_TUTORIAL && jumpCount == TUTORIAL_SELECTION_TILE + 3L) {
-                // This first coloured row confirms the selected route visually;
-                // the ball remains yellow until the centre switch lesson.
+                // Keep the ball visually tied to every non-yellow floor it lands
+                // on; yellow remains neutral and never overwrites its tint.
+                if (landingColour != CENTRE_EDGE) ballTint = landingColour;
             } else if (isSwitchTile(jumpCount) && currentLane == 0) {
                 // The middle tile on an extended cyan group is optional: stepping on
                 // it changes the active colour, while passing it keeps the old one.
