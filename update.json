@@ -1,6 +1,6 @@
 {
-  "versionCode": 641,
-  "versionName": "6.41",
-  "notes": "教学的选色与变色提示均会暂停路线，点击按钮后继续",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@f3a995c43c6b78fc2d5a085cc180baaa16edcaf8/releases/tianji-rolling-ball.apk"
+  "versionCode": 642,
+  "versionName": "6.42",
+  "notes": "教学道路调整为两排黄色一排有色，变色格置于四排黄色的第二排中间",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@1a7715a9c0dd613a0b3a2f96b7f33811a743d359/releases/tianji-rolling-ball.apk"
 }
