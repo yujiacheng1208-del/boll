@@ -1,6 +1,6 @@
 {
-  "versionCode": 649,
-  "versionName": "6.49",
-  "notes": "修正头像颜色：青曜为青蓝，金砂为独立金色",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@fa088edc302e27bc53f0bea824679edba9658e1b/releases/tianji-rolling-ball.apk"
+  "versionCode": 650,
+  "versionName": "6.50",
+  "notes": "安装更新后打开或返回应用时自动回到游戏主页面",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@9c2dd9c970364fa4f8fb5fa9f33b3caa60c8eaa4/releases/tianji-rolling-ball.apk"
 }
