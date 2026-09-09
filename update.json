@@ -1,6 +1,6 @@
 {
-  "versionCode": 645,
-  "versionName": "6.45",
-  "notes": "教学模式小球落在非黄色方块时会同步对应颜色",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@96d233270d1ec21d49dd03a5ab2b752b1849b4c6/releases/tianji-rolling-ball.apk"
+  "versionCode": 646,
+  "versionName": "6.46",
+  "notes": "教学变色格会避开首次选择的颜色，并随机使用另外两色之一",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@958a00ab72b2f555e123dff931751cbb05c8fd03/releases/tianji-rolling-ball.apk"
 }
