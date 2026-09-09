@@ -1,6 +1,6 @@
 {
-  "versionCode": 646,
-  "versionName": "6.46",
-  "notes": "教学变色格会避开首次选择的颜色，并随机使用另外两色之一",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@958a00ab72b2f555e123dff931751cbb05c8fd03/releases/tianji-rolling-ball.apk"
+  "versionCode": 647,
+  "versionName": "6.47",
+  "notes": "远方星空增加低亮度星点、彩星与轻微星云点缀",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@e75d12da9b1f4a60b9923852a3b7224c0919d6ad/releases/tianji-rolling-ball.apk"
 }
