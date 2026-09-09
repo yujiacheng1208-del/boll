@@ -1,6 +1,6 @@
 {
-  "versionCode": 637,
-  "versionName": "6.37",
-  "notes": "教学变色格提示提前开启，预留更多换轨时间",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@2805cf9bd4dff4ce1a185c61dc2468dd157161f0/releases/tianji-rolling-ball.apk"
+  "versionCode": 638,
+  "versionName": "6.38",
+  "notes": "教学开场新增左右滑动控制引导",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@625681cc368502dbb4cfa2fc210d0f2592c00600/releases/tianji-rolling-ball.apk"
 }
