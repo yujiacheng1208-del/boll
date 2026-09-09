@@ -1143,18 +1143,16 @@ public final class RollingGameView extends View {
             // The first coloured row is a visual choice prompt only; landing on
             // it never changes the yellow tutorial ball.
             if (tileId == TUTORIAL_SELECTION_TILE) {
-                if (lane < 0) return RED_EDGE;
-                if (lane == 0) return ORANGE_EDGE;
-                return PINK_EDGE;
+                return tutorialColourRowColour(tileId, lane);
             }
             // Two yellow rows then a colour row introduce the target route. The
             // first coloured row is still only a visual preview before switching.
-            if (tileId == TUTORIAL_SELECTION_TILE + 3L) return tutorialTargetRowColour(lane);
+            if (tileId == TUTORIAL_SELECTION_TILE + 3L) return tutorialColourRowColour(tileId, lane);
             // The four yellow rows begin at 10; their second middle tile is the
             // optional colour switch demonstrated by the teaching prompt.
             if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? tutorialTargetColour : CENTRE_EDGE;
             if (tileId >= TUTORIAL_SWITCH_TILE + 5L
-                    && Math.floorMod(tileId - (TUTORIAL_SWITCH_TILE + 5L), 3L) == 0L) return tutorialTargetRowColour(lane);
+                    && Math.floorMod(tileId - (TUTORIAL_SWITCH_TILE + 5L), 3L) == 0L) return tutorialColourRowColour(tileId, lane);
             return CENTRE_EDGE;
         }
         int kind = rowKind(tileId);
@@ -1175,11 +1173,15 @@ public final class RollingGameView extends View {
         return (gameMode == MODE_TUTORIAL && tileId == TUTORIAL_SWITCH_TILE) || rowKind(tileId) == ROW_OPTIONAL_SWITCH;
     }
 
-    private int tutorialTargetRowColour(int lane) {
-        if (lane == 0) return tutorialTargetColour;
-        if (tutorialTargetColour == RED_EDGE) return lane < 0 ? ORANGE_EDGE : PINK_EDGE;
-        if (tutorialTargetColour == ORANGE_EDGE) return lane < 0 ? RED_EDGE : PINK_EDGE;
-        return lane < 0 ? RED_EDGE : ORANGE_EDGE;
+    private int tutorialColourRowColour(long tileId, int lane) {
+        // Each tutorial colour row is a deterministic-per-run permutation: all
+        // three colours appear once, while every new game receives a fresh layout.
+        int[] colours = {RED_EDGE, ORANGE_EDGE, PINK_EDGE};
+        long hash = mapHash(tileId * 1103515245L + 7919L);
+        int start = (int)Math.floorMod(hash, 3L);
+        int laneOrder = lane + 1;
+        if ((hash & 1L) != 0L) laneOrder = 2 - laneOrder;
+        return colours[(start + laneOrder) % 3];
     }
 
     private String colourName(int colour) {
