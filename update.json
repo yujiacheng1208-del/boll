@@ -1,6 +1,6 @@
 {
-  "versionCode": 635,
-  "versionName": "6.35",
-  "notes": "优化教学模式排版，解决攻略卡片文字与按钮重叠",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@f736c68059b3c594d3326e0435f6683ca9eca0a0/releases/tianji-rolling-ball.apk"
+  "versionCode": 636,
+  "versionName": "6.36",
+  "notes": "教学流程改为自然前进、首排选色、黄色安全路线与变色格提前说明",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@e2f3d455cd68711c8bbf12c3c4ac15db5780ab00/releases/tianji-rolling-ball.apk"
 }
