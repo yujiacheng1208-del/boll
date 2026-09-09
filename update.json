@@ -1,6 +1,6 @@
 {
-  "versionCode": 647,
-  "versionName": "6.47",
-  "notes": "远方星空增加低亮度星点、彩星与轻微星云点缀",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@e75d12da9b1f4a60b9923852a3b7224c0919d6ad/releases/tianji-rolling-ball.apk"
+  "versionCode": 648,
+  "versionName": "6.48",
+  "notes": "增加星空密度；更新下载留在应用内，完成后直接打开安装界面",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@bbd1a11fd18c0d790772150930497b18a7beff3b/releases/tianji-rolling-ball.apk"
 }
