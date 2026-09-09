@@ -1,6 +1,6 @@
 {
-  "versionCode": 636,
-  "versionName": "6.36",
-  "notes": "教学流程改为自然前进、首排选色、黄色安全路线与变色格提前说明",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@e2f3d455cd68711c8bbf12c3c4ac15db5780ab00/releases/tianji-rolling-ball.apk"
+  "versionCode": 637,
+  "versionName": "6.37",
+  "notes": "教学变色格提示提前开启，预留更多换轨时间",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@2805cf9bd4dff4ce1a185c61dc2468dd157161f0/releases/tianji-rolling-ball.apk"
 }
