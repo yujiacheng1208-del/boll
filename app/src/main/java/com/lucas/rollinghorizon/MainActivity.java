@@ -29,6 +29,8 @@ import java.net.URL;
 
 public class MainActivity extends Activity {
     private static final String UPDATE_INFO_URL = "https://api.github.com/repos/yujiacheng1208-del/boll/contents/update.json?ref=main";
+    private static final String UPDATE_STATE = "tianji_update_state";
+    private static final String EXPECTED_UPDATE_VERSION = "expected_version";
     private long updateDownloadId = -1L;
     private BroadcastReceiver updateReceiver;
     private String pendingUpdateUrl = "";
@@ -135,6 +137,10 @@ public class MainActivity extends Activity {
                 "tianji-rolling-ball-update-" + Math.max(1, versionCode) + ".apk");
         DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
         updateDownloadId = manager.enqueue(request);
+        // Preserve this marker through package replacement. The new build can
+        // then discard any old in-progress game and return to its home screen.
+        getSharedPreferences(UPDATE_STATE, MODE_PRIVATE).edit()
+                .putInt(EXPECTED_UPDATE_VERSION, versionCode).apply();
         installerOpened = false;
         // Stay in the app while Android downloads in the background. The watcher
         // below opens the package installer directly as soon as it completes.
@@ -189,6 +195,13 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        int expectedVersion = getSharedPreferences(UPDATE_STATE, MODE_PRIVATE)
+                .getInt(EXPECTED_UPDATE_VERSION, 0);
+        if (gameView != null && expectedVersion > 0 && BuildConfig.VERSION_CODE >= expectedVersion) {
+            getSharedPreferences(UPDATE_STATE, MODE_PRIVATE).edit()
+                    .remove(EXPECTED_UPDATE_VERSION).apply();
+            gameView.returnToHomeAfterUpdate();
+        }
         if (gameView != null) gameView.resumeBackgroundMusic();
         if (!pendingUpdateUrl.isEmpty() && (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || getPackageManager().canRequestPackageInstalls())) {
             String url = pendingUpdateUrl; int version = pendingUpdateVersion;

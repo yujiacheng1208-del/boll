@@ -693,6 +693,11 @@ public final class RollingGameView extends View {
         ballTint = CENTRE_EDGE;
     }
 
+    /** Called after a package update so the refreshed app always opens at home. */
+    public void returnToHomeAfterUpdate() {
+        returnToHome();
+    }
+
     private void drawButton(Canvas c, float cx, float cy, String label) {
         float buttonWidth = 142f * density, buttonHeight = 48f * density;
         p.setShader(new LinearGradient(cx-buttonWidth*.5f, cy, cx+buttonWidth*.5f, cy,
