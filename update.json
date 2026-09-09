@@ -1,6 +1,6 @@
 {
-  "versionCode": 652,
-  "versionName": "6.52",
-  "notes": "星空点缀在上一版基础上再翻倍",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@f3a329c4b9a35b5c6501646b71b61d07d74bd146/releases/tianji-rolling-ball.apk"
+  "versionCode": 653,
+  "versionName": "6.53",
+  "notes": "屏幕两侧新增微弱透视导向光，向远方通道收束",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@8958e653ad08db18eaafc248ad9f6cc2172b1407/releases/tianji-rolling-ball.apk"
 }
