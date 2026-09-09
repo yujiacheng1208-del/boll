@@ -96,6 +96,7 @@ public final class RollingGameView extends View {
     private int tutorialStage = 0;
     private boolean tutorialHintOpen = false;
     private int tutorialTargetColour = ORANGE_EDGE;
+    private int tutorialSwitchColour = RED_EDGE;
     private boolean tutorialCompleteOpen = false;
     private boolean tutorialColourChoiceOpen = false;
     private boolean tutorialChoiceHintVisible = false;
@@ -657,6 +658,7 @@ public final class RollingGameView extends View {
         tutorialStage = mode == MODE_TUTORIAL ? 0 : 2;
         tutorialHintOpen = false;
         tutorialTargetColour = ORANGE_EDGE;
+        tutorialSwitchColour = RED_EDGE;
         tutorialCompleteOpen = false;
         tutorialColourChoiceOpen = false;
         tutorialChoiceHintVisible = false;
@@ -960,15 +962,15 @@ public final class RollingGameView extends View {
         p.setShader(null);
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.4f*density); p.setColor(0xFF6DEAF5);
         c.drawRoundRect(w*.11f, h*.20f, w*.89f, h*.60f, 26f*density, 26f*density, p); p.setStyle(Paint.Style.FILL);
-        p.setColor(tutorialTargetColour); c.drawCircle(cx, h*.275f, 19f*density, p);
+        p.setColor(tutorialSwitchColour); c.drawCircle(cx, h*.275f, 19f*density, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(21f*density); p.setColor(Color.WHITE);
         c.drawText("变色格教学", cx, h*.34f, p);
         p.setTextSize(12f*density); p.setColor(0xFFC6E4E9);
-        c.drawText("保持中间轨道，穿过前方" + colourName(tutorialTargetColour) + "方块", cx, h*.39f, p);
+        c.drawText("保持中间轨道，穿过前方" + colourName(tutorialSwitchColour) + "方块", cx, h*.39f, p);
         c.drawText("小球变色后，只能走同色方块", cx, h*.42f, p);
         // A small direction marker keeps the player's focus on the visible route.
         drawButton(c, cx, h*.49f, "继续前进");
-        p.setColor(tutorialTargetColour); path.reset(); path.moveTo(cx, h*.57f); path.lineTo(cx-10f*density, h*.545f); path.lineTo(cx+10f*density, h*.545f); path.close(); c.drawPath(path, p);
+        p.setColor(tutorialSwitchColour); path.reset(); path.moveTo(cx, h*.57f); path.lineTo(cx-10f*density, h*.545f); path.lineTo(cx+10f*density, h*.545f); path.close(); c.drawPath(path, p);
         p.setTextAlign(Paint.Align.LEFT);
     }
 
@@ -1150,7 +1152,7 @@ public final class RollingGameView extends View {
             if (tileId == TUTORIAL_SELECTION_TILE + 3L) return tutorialColourRowColour(tileId, lane);
             // The four yellow rows begin at 10; their second middle tile is the
             // optional colour switch demonstrated by the teaching prompt.
-            if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? tutorialTargetColour : CENTRE_EDGE;
+            if (tileId == TUTORIAL_SWITCH_TILE) return lane == 0 ? tutorialSwitchColour : CENTRE_EDGE;
             if (tileId >= TUTORIAL_SWITCH_TILE + 5L
                     && Math.floorMod(tileId - (TUTORIAL_SWITCH_TILE + 5L), 3L) == 0L) return tutorialColourRowColour(tileId, lane);
             return CENTRE_EDGE;
@@ -1182,6 +1184,14 @@ public final class RollingGameView extends View {
         int laneOrder = lane + 1;
         if ((hash & 1L) != 0L) laneOrder = 2 - laneOrder;
         return colours[(start + laneOrder) % 3];
+    }
+
+    private int differentTutorialSwitchColour(int selectedColour) {
+        int[] alternatives;
+        if (selectedColour == RED_EDGE) alternatives = new int[]{ORANGE_EDGE, PINK_EDGE};
+        else if (selectedColour == ORANGE_EDGE) alternatives = new int[]{RED_EDGE, PINK_EDGE};
+        else alternatives = new int[]{RED_EDGE, ORANGE_EDGE};
+        return alternatives[(int)Math.floorMod(mapHash(TUTORIAL_SWITCH_TILE * 31337L), 2L)];
     }
 
     private String colourName(int colour) {
@@ -1339,6 +1349,7 @@ public final class RollingGameView extends View {
                 // The first colour row is selected by steering into a lane. A
                 // non-yellow landing always gives the tutorial ball that colour.
                 tutorialTargetColour = landingColour;
+                tutorialSwitchColour = differentTutorialSwitchColour(landingColour);
                 ballTint = landingColour;
                 tutorialChoiceHintVisible = false;
                 tutorialStage = 2;
@@ -1352,6 +1363,7 @@ public final class RollingGameView extends View {
                 requiredColour = landingColour;
                 ballTint = landingColour;
                 colourChosen = true;
+                if (gameMode == MODE_TUTORIAL) tutorialTargetColour = landingColour;
                 changedBallColour = true;
             } else if (landingColour != CENTRE_EDGE) {
                 if (!colourChosen) {
