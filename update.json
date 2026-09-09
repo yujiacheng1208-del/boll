@@ -1,6 +1,6 @@
 {
-  "versionCode": 643,
-  "versionName": "6.43",
-  "notes": "应用内更新会直接打开系统下载更新界面，完成后自动进入安装",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@fb68f60e8c6c81f6ca59d39b3c236ea9e4cfc099/releases/tianji-rolling-ball.apk"
+  "versionCode": 644,
+  "versionName": "6.44",
+  "notes": "教学模式的有色方块排列改为每局随机",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@0e7e992af82f4f1f001f1411a0e87ccbbcf6529e/releases/tianji-rolling-ball.apk"
 }
