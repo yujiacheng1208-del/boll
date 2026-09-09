@@ -1,6 +1,6 @@
 {
-  "versionCode": 639,
-  "versionName": "6.39",
-  "notes": "教学在三排黄色格前提示滑动选色，选色改为通过轨道完成",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@d0fd92ddc148bee69820395e23a801a2566ef815/releases/tianji-rolling-ball.apk"
+  "versionCode": 640,
+  "versionName": "6.40",
+  "notes": "教学选色滑动提示提前至六排黄色轨道前",
+  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@f23978d46928e0176b544a83738704795a96ef19/releases/tianji-rolling-ball.apk"
 }
