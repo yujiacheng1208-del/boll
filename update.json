@@ -1,6 +1,6 @@
 {
-  "versionCode": 654,
-  "versionName": "6.54",
-  "notes": "更新改用独立发布包并校验 APK 版本，解决错版与缓存问题",
-  "apkUrl": "https://github.com/yujiacheng1208-del/boll/releases/download/v6.54/tianji-rolling-ball-v6.54.apk"
+  "versionCode": 655,
+  "versionName": "6.55",
+  "notes": "重绘两侧导航灯带为柔和分段光点，更自然地引导通道方向",
+  "apkUrl": "https://github.com/yujiacheng1208-del/boll/releases/download/v6.55/tianji-rolling-ball-v6.55.apk"
 }
