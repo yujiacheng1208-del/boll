@@ -1293,7 +1293,7 @@ public final class RollingGameView extends View {
             p.setShader(new RadialGradient(w*.84f, h*.25f, w*.30f,
                     new int[]{0x102D5167, 0x00000000}, null, Shader.TileMode.CLAMP));
             c.drawCircle(w*.84f, h*.25f, w*.30f, p); p.setShader(null);
-            for (int i = 0; i < 52; i++) {
+            for (int i = 0; i < 156; i++) {
                 float starX = ((i * 73 + 19) % 101) / 100f * w;
                 float starY = h * (.045f + ((i * 31) % 43) / 100f);
                 float glow = .42f + .36f * (float)Math.sin(t * Math.PI * 2 + i * 1.4f);
