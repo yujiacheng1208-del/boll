@@ -1218,8 +1218,8 @@ public final class RollingGameView extends View {
         boolean tutorialSwitchVisible = jumpCount > TUTORIAL_GUIDE_TILE
                 || (jumpCount == TUTORIAL_GUIDE_TILE && jumpPhase >= .42f);
         if (gameMode == MODE_TUTORIAL && tutorialStage == 0
-                && jumpCount >= TUTORIAL_SELECTION_TILE - 3L) {
-            // Three yellow rows before the three-colour row, explain that the
+                && jumpCount >= TUTORIAL_SELECTION_TILE - 6L) {
+            // Six yellow rows before the three-colour row, explain that the
             // player's ordinary left/right drag is also their colour selection.
             tutorialChoiceHintVisible = true;
         }
