@@ -1,6 +1,6 @@
 {
-  "versionCode": 653,
-  "versionName": "6.53",
-  "notes": "屏幕两侧新增微弱透视导向光，向远方通道收束",
-  "apkUrl": "https://cdn.jsdelivr.net/gh/yujiacheng1208-del/boll@8958e653ad08db18eaafc248ad9f6cc2172b1407/releases/tianji-rolling-ball.apk"
+  "versionCode": 654,
+  "versionName": "6.54",
+  "notes": "更新改用独立发布包并校验 APK 版本，解决错版与缓存问题",
+  "apkUrl": "https://github.com/yujiacheng1208-del/boll/releases/download/v6.54/tianji-rolling-ball-v6.54.apk"
 }
