@@ -49,6 +49,10 @@ public final class RollingGameView extends View {
     private static final int RED_EDGE = 0xFFFF5F70;
     private static final int ORANGE_EDGE = 0xFF55D9E7;
     private static final int PINK_EDGE = 0xFFFF77C9;
+    // Account avatars use their own palette, independent of the gameplay tiles.
+    private static final int AVATAR_AZURE = 0xFF35CFF2;
+    private static final int AVATAR_GOLD = 0xFFFFA928;
+    private static final int AVATAR_PURPLE = 0xFFB98CFF;
     private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path = new Path();
     private final SharedPreferences preferences;
@@ -481,7 +485,7 @@ public final class RollingGameView extends View {
         LinearLayout page = new LinearLayout(getContext());
         page.setOrientation(LinearLayout.VERTICAL);
         int pad = (int)(20 * density); page.setPadding(pad, pad, pad, pad);
-        int[] avatarColours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
+        int[] avatarColours = {AVATAR_AZURE, RED_EDGE, AVATAR_GOLD, AVATAR_PURPLE};
         int avatarIndex = preferences.getInt("avatar_" + currentUser, 0) % avatarColours.length;
         TextView portrait = new TextView(getContext());
         portrait.setText(currentUser.substring(0, 1)); portrait.setTextSize(25); portrait.setTextColor(Color.WHITE);
@@ -777,7 +781,7 @@ public final class RollingGameView extends View {
             for (int i = 0; i < shown; i++) {
                 float y = h*(.34f + i*.075f);
                 String user = users.get(i);
-                int[] avatarColours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
+                int[] avatarColours = {AVATAR_AZURE, RED_EDGE, AVATAR_GOLD, AVATAR_PURPLE};
                 int avatar = preferences.getInt("avatar_" + user, 0) % avatarColours.length;
                 float avatarX = w*.285f;
                 p.setColor(avatarColours[avatar]); c.drawCircle(avatarX, y-6f*density, 13f*density, p);
@@ -849,7 +853,7 @@ public final class RollingGameView extends View {
 
     private void drawProfile(Canvas c) {
         if (currentUser == null || currentUser.isEmpty()) return;
-        int[] colours = {CENTRE_EDGE, RED_EDGE, 0xFFFFC65B, 0xFFB98CFF};
+        int[] colours = {AVATAR_AZURE, RED_EDGE, AVATAR_GOLD, AVATAR_PURPLE};
         int avatar = preferences.getInt("avatar_" + currentUser, 0) % colours.length;
         float x = 34f*density, y = 34f*density, r = 18f*density;
         p.setColor(0xB80A1821); c.drawRoundRect(10f*density, 10f*density, 145f*density, 58f*density, 24f*density, 24f*density, p);
