@@ -96,6 +96,7 @@ public final class RollingGameView extends View {
     private int tutorialTargetColour = ORANGE_EDGE;
     private boolean tutorialCompleteOpen = false;
     private boolean tutorialColourChoiceOpen = false;
+    private boolean tutorialChoiceHintVisible = false;
 
     public RollingGameView(Context context) {
         super(context);
@@ -648,6 +649,7 @@ public final class RollingGameView extends View {
         tutorialTargetColour = ORANGE_EDGE;
         tutorialCompleteOpen = false;
         tutorialColourChoiceOpen = false;
+        tutorialChoiceHintVisible = false;
         // Music begins as soon as a game session opens, including the colour-choice screen.
         startMusic();
     }
@@ -667,6 +669,7 @@ public final class RollingGameView extends View {
         confirmHomeOpen = false;
         tutorialCompleteOpen = false;
         tutorialColourChoiceOpen = false;
+        tutorialChoiceHintVisible = false;
         colourBonusAt = 0L;
         score = 0;
         lanePosition = 0f;
@@ -916,6 +919,22 @@ public final class RollingGameView extends View {
         path.reset(); path.moveTo(w*.82f, y); path.lineTo(w*.77f, y-6f*density); path.lineTo(w*.77f, y+6f*density); path.close(); c.drawPath(path, p);
         p.setTextAlign(Paint.Align.CENTER); p.setTextSize(11f*density); p.setColor(0xFFD0EDF0);
         c.drawText("左右滑动屏幕，控制小球移动", cx, y + 27f*density, p);
+        p.setTextAlign(Paint.Align.LEFT);
+    }
+
+    private void drawTutorialColourSwipeHint(Canvas c, float w, float h, long elapsed) {
+        float cx = w*.5f;
+        float glow = .66f + .24f*(float)Math.sin(elapsed / 420f);
+        p.setShader(new LinearGradient(w*.13f, h*.215f, w*.87f, h*.285f,
+                new int[]{Color.argb((int)(165*glow), 30, 43, 22), Color.argb((int)(110*glow), 10, 24, 32)}, null, Shader.TileMode.CLAMP));
+        c.drawRoundRect(w*.13f, h*.215f, w*.87f, h*.285f, 17f*density, 17f*density, p);
+        p.setShader(null);
+        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(density); p.setColor(0xBBFFE07B);
+        c.drawRoundRect(w*.13f, h*.215f, w*.87f, h*.285f, 17f*density, 17f*density, p); p.setStyle(Paint.Style.FILL);
+        p.setTextAlign(Paint.Align.CENTER); p.setTextSize(12.5f*density); p.setColor(0xFFFFE69A);
+        c.drawText("左右滑动屏幕，选择你想要的颜色并继续游戏", cx, h*.247f, p);
+        p.setTextSize(10.5f*density); p.setColor(0xFFC6DFE1);
+        c.drawText("前方三色方块将记录你的选择", cx, h*.271f, p);
         p.setTextAlign(Paint.Align.LEFT);
     }
 
@@ -1196,14 +1215,13 @@ public final class RollingGameView extends View {
         float cycleCount = elapsedSeconds * (startRate + (endRate - startRate) * .5f * speedRamp) * 1.5f;
         long jumpCount = (long)Math.floor(cycleCount);
         float jumpPhase = cycleCount - jumpCount;
-        boolean tutorialSelectionVisible = jumpCount > TUTORIAL_SELECTION_TILE - 1L
-                || (jumpCount == TUTORIAL_SELECTION_TILE - 1L && jumpPhase >= .62f);
         boolean tutorialSwitchVisible = jumpCount > TUTORIAL_GUIDE_TILE
                 || (jumpCount == TUTORIAL_GUIDE_TILE && jumpPhase >= .42f);
-        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && tutorialSelectionVisible) {
-            tutorialStage = 1;
-            tutorialColourChoiceOpen = true;
-            lastFrameAt = now;
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0
+                && jumpCount >= TUTORIAL_SELECTION_TILE - 3L) {
+            // Three yellow rows before the three-colour row, explain that the
+            // player's ordinary left/right drag is also their colour selection.
+            tutorialChoiceHintVisible = true;
         }
         if (gameMode == MODE_TUTORIAL && tutorialStage == 2 && tutorialSwitchVisible) {
             // Stop one tile early: the switch is visible below the prompt and the
@@ -1297,8 +1315,11 @@ public final class RollingGameView extends View {
                 fallStartedAt = now;
                 frozenElapsed = elapsed;
             } else if (gameMode == MODE_TUTORIAL && jumpCount == TUTORIAL_SELECTION_TILE) {
-                // The choice row previews three colours only. It deliberately has
-                // no gameplay consequence so the yellow safety lesson can continue.
+                // The first colour row is selected by steering into a lane. The
+                // ball stays yellow until the later centre switch demonstrates it.
+                tutorialTargetColour = landingColour;
+                tutorialChoiceHintVisible = false;
+                tutorialStage = 2;
             } else if (isSwitchTile(jumpCount) && currentLane == 0) {
                 // The middle tile on an extended cyan group is optional: stepping on
                 // it changes the active colour, while passing it keeps the old one.
@@ -1461,7 +1482,8 @@ public final class RollingGameView extends View {
         if (confirmHomeOpen && settingsOpen && gameStartedAt >= 0L) drawHomeConfirm(c, w, h);
         if (colourChoiceOpen && gameStartedAt >= 0L) drawColourChoice(c, w, h);
         if (gameMode == MODE_TUTORIAL && gameStartedAt >= 0L && !failed && !completed && !tutorialHintOpen && !tutorialCompleteOpen && !tutorialColourChoiceOpen) drawTutorialGuide(c, w, h, elapsed);
-        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && gameStartedAt >= 0L && !tutorialColourChoiceOpen) drawTutorialSwipeHint(c, w, h, elapsed);
+        if (gameMode == MODE_TUTORIAL && tutorialStage == 0 && gameStartedAt >= 0L && !tutorialChoiceHintVisible) drawTutorialSwipeHint(c, w, h, elapsed);
+        if (gameMode == MODE_TUTORIAL && tutorialChoiceHintVisible && gameStartedAt >= 0L) drawTutorialColourSwipeHint(c, w, h, elapsed);
         if (tutorialColourChoiceOpen && gameStartedAt >= 0L) drawTutorialColourChoice(c, w, h);
         if (tutorialHintOpen && gameStartedAt >= 0L) drawTutorialSwitchPrompt(c, w, h);
         if (tutorialCompleteOpen && gameStartedAt >= 0L) drawTutorialComplete(c, w, h, elapsed);
